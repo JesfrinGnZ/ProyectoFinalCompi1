@@ -1,0 +1,115 @@
+/*--------------- 1ra Area: Codigo de Usuario -----------------------*/
+//-------> importaciones, paquetes
+
+package backend.generacionHtml;
+import java_cup.runtime.*;
+
+
+
+parser code {:
+
+
+    // Connect this parser to a scanner!
+    public parser(AnalizadorDeCodigoEmbebido lex) {
+	super(lex);
+    }
+
+    //Metodo al que se llama automaticamente ante algun error sintactico
+    public void syntax_error(Symbol s){        
+        //System.out.println("ERROR EN ESTRUCTURA");
+    }
+
+    //Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{        
+                //System.out.println("ERROR EN ESTRUCTURA");
+    }
+
+:}
+
+
+/*--------------- 2da Area: Declaraciones -----------------------*/
+
+//---------------------------------------------TERMINALES-----------------------------------
+
+/****************************************Expresiones*************************/
+
+terminal String NUMERO;
+
+/****************************************Definición de variables*************************/
+
+terminal String     VAR,IDENTIFICADOR;
+
+terminal String     INTEGER,BOOLEAN,STRING,TRUE,FALSE;
+
+
+/****************************************Operaciones logicas*************************/
+
+terminal String     AND,OR;
+
+/****************************************Condicional(If)*************************/
+
+terminal String     IF,THEN,ELSE;
+
+/***************************************Ciclos***********************************/
+
+terminal String     WHILE,FOR,TO;
+
+/***************************************Bloques***********************************/
+
+terminal String     BEGIN,END;
+
+
+
+/****************************************Definición de simbolos*************************/
+
+terminal String         MAS,MENOS,POR,DIV,MAYOR,MENOR,DOS_PUNTOS,IGUAL,PARENTESIS_ABIERTO,PARENTESIS_CERRADO,
+                        COMA,PUNTO_COMA,CORCHETE_ABIERTO,CORCHETE_CERRADO;//Expresiones matematicas
+
+
+
+
+
+//--------------------------------------------NO TERMINALES-------------------------------------
+
+non terminal Object     operacion;//Inicio de gramatica
+
+non terminal Object     expresion,t,f; //Expresiones matematicas
+
+non terminal Object     conjuntoDeInstrucciones,unaInstruccion;
+/*--------------- 3ra Area: Reglas Semanticas -----------------------*/
+
+start with operacion;
+
+
+ //----------------------------------------------------EXPRESIONES MATEMATICAS-------------------------------
+
+operacion::=expresion:t {:System.out.println("Resultado:"+t);:};
+
+expresion::=expresion:i MAS t:e
+    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'+');:};
+
+expresion::=expresion:i MENOS t:e
+    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'-');:};
+
+expresion::=t:i
+    {:RESULT=i;:};
+
+
+t::=t:i POR f:e
+    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'*');:};
+
+t::=t:i DIV f:e
+    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'/');:};
+
+t::=f:i
+    {:RESULT=i;:};
+
+
+f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
+    {:RESULT=buscarValorDeIdentificador(i.toString());:};
+
+f::=NUMERO:i
+    {:RESULT=i;:};
+
+f::=PARENTESIS_ABIERTO expresion:i PARENTESIS_CERRADO
+    {:RESULT=i;:};
