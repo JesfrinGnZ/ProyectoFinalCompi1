@@ -3,11 +3,14 @@
 
 package backend.generacionHtml;
 import java_cup.runtime.*;
-
+import backend.arbol.*;
+import backend.AccionesMatematicas.*;
 
 
 parser code {:
 
+    Nodo nodo1=null;
+    Nodo nodo2=null;
 
     // Connect this parser to a scanner!
     public parser(AnalizadorDeCodigoEmbebido lex) {
@@ -54,6 +57,10 @@ terminal String     IF,THEN,ELSE;
 
 terminal String     WHILE,FOR,TO;
 
+/***************************************Escritura***********************************/
+
+terminal String     PRINT,ORACION,URL;
+
 /***************************************Bloques***********************************/
 
 terminal String     BEGIN,END;
@@ -63,7 +70,7 @@ terminal String     BEGIN,END;
 /****************************************Definición de simbolos*************************/
 
 terminal String         MAS,MENOS,POR,DIV,MAYOR,MENOR,DOS_PUNTOS,IGUAL,PARENTESIS_ABIERTO,PARENTESIS_CERRADO,
-                        COMA,PUNTO_COMA,CORCHETE_ABIERTO,CORCHETE_CERRADO;//Expresiones matematicas
+                        COMA,PUNTO_COMA,CORCHETE_ABIERTO,CORCHETE_CERRADO,PORCENTAJE;//Expresiones matematicas
 
 
 
@@ -73,7 +80,7 @@ terminal String         MAS,MENOS,POR,DIV,MAYOR,MENOR,DOS_PUNTOS,IGUAL,PARENTESI
 
 non terminal Object     operacion;//Inicio de gramatica
 
-non terminal Object     expresion,t,f; //Expresiones matematicas
+non terminal Nodo     expresion,t,f; //Expresiones matematicas
 
 non terminal Object     conjuntoDeInstrucciones,unaInstruccion;
 /*--------------- 3ra Area: Reglas Semanticas -----------------------*/
@@ -83,33 +90,54 @@ start with operacion;
 
  //----------------------------------------------------EXPRESIONES MATEMATICAS-------------------------------
 
-operacion::=expresion:t {:System.out.println("Resultado:"+t);:};
+operacion::=expresion:t 
+  {:System.out.println(t);
+    Arbol arbol = new Arbol(t);
+    arbol.evaluar();:};
 
 expresion::=expresion:i MAS t:e
-    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'+');:};
+    {:System.out.println(i+"+"+e);
+    Suma s = new Suma();
+    Nodo<Division> n= new Nodo(s);
+    n.getNodosHijos().add(i);
+    n.getNodosHijos().add(e);
+    RESULT=n;:};
 
 expresion::=expresion:i MENOS t:e
-    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'-');:};
+    {:System.out.println(i+"-"+e);
+    Resta r = new Resta();
+    Nodo<Resta> n= new Nodo(r);
+    n.getNodosHijos().add(i);
+    n.getNodosHijos().add(e);
+    RESULT=n;:};
 
 expresion::=t:i
     {:RESULT=i;:};
 
 
 t::=t:i POR f:e
-    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'*');:};
+    {:System.out.println(i+"*"+e);
+    Multiplicacion m = new Multiplicacion();
+    Nodo<Multiplicacion> n= new Nodo(m);
+    n.getNodosHijos().add(i);
+    n.getNodosHijos().add(e);
+    RESULT=n;:};
 
 t::=t:i DIV f:e
-    {:RESULT=operarElementos(Double.valueOf(i.toString()),Double.valueOf(e.toString()),'/');:};
+    {:System.out.println(i+"/"+e);
+    Division d = new Division();
+    Nodo<Division> n= new Nodo(d);
+    n.getNodosHijos().add(i);
+    n.getNodosHijos().add(e);
+    RESULT=n;:};
 
 t::=f:i
-    {:RESULT=i;:};
+    {:RESULT=new Nodo("int",i.getValor());;:};
 
 
-f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
-    {:RESULT=buscarValorDeIdentificador(i.toString());:};
+//f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
+//    {:RESULT=i;:};
 
 f::=NUMERO:i
-    {:RESULT=i;:};
+    {:RESULT=new Nodo("int",i);:};
 
-f::=PARENTESIS_ABIERTO expresion:i PARENTESIS_CERRADO
-    {:RESULT=i;:};

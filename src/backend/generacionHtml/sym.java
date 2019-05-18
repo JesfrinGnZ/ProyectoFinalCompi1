@@ -8,40 +8,44 @@ package backend.generacionHtml;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int MENOS = 21;
-  public static final int AND = 10;
-  public static final int MENOR = 25;
-  public static final int PARENTESIS_ABIERTO = 28;
-  public static final int ELSE = 14;
-  public static final int IGUAL = 27;
-  public static final int OR = 11;
-  public static final int THEN = 13;
-  public static final int WHILE = 15;
-  public static final int END = 19;
-  public static final int CORCHETE_CERRADO = 33;
-  public static final int TRUE = 8;
-  public static final int IF = 12;
-  public static final int POR = 22;
-  public static final int DOS_PUNTOS = 26;
-  public static final int BEGIN = 18;
-  public static final int PARENTESIS_CERRADO = 29;
-  public static final int BOOLEAN = 6;
-  public static final int COMA = 30;
-  public static final int STRING = 7;
-  public static final int MAYOR = 24;
-  public static final int EOF = 0;
-  public static final int DIV = 23;
-  public static final int FALSE = 9;
-  public static final int error = 1;
   public static final int NUMERO = 2;
-  public static final int IDENTIFICADOR = 4;
-  public static final int PUNTO_COMA = 31;
+  public static final int POR = 25;
+  public static final int CORCHETE_CERRADO = 36;
+  public static final int ORACION = 19;
   public static final int INTEGER = 5;
+  public static final int DOS_PUNTOS = 29;
+  public static final int PORCENTAJE = 37;
+  public static final int PARENTESIS_ABIERTO = 31;
   public static final int FOR = 16;
-  public static final int CORCHETE_ABIERTO = 32;
+  public static final int IDENTIFICADOR = 4;
+  public static final int AND = 10;
+  public static final int IGUAL = 30;
+  public static final int OR = 11;
+  public static final int DIV = 26;
+  public static final int BEGIN = 21;
+  public static final int IF = 12;
+  public static final int PUNTO_COMA = 34;
+  public static final int CORCHETE_ABIERTO = 35;
+  public static final int EOF = 0;
+  public static final int BOOLEAN = 6;
+  public static final int TRUE = 8;
+  public static final int error = 1;
+  public static final int COMA = 33;
+  public static final int MENOS = 24;
+  public static final int MENOR = 28;
+  public static final int URL = 20;
+  public static final int MAYOR = 27;
+  public static final int ELSE = 14;
   public static final int TO = 17;
-  public static final int MAS = 20;
+  public static final int WHILE = 15;
+  public static final int THEN = 13;
+  public static final int END = 22;
+  public static final int STRING = 7;
+  public static final int PARENTESIS_CERRADO = 32;
+  public static final int FALSE = 9;
   public static final int VAR = 3;
+  public static final int PRINT = 18;
+  public static final int MAS = 23;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -61,6 +65,9 @@ public class sym {
   "WHILE",
   "FOR",
   "TO",
+  "PRINT",
+  "ORACION",
+  "URL",
   "BEGIN",
   "END",
   "MAS",
@@ -76,7 +83,8 @@ public class sym {
   "COMA",
   "PUNTO_COMA",
   "CORCHETE_ABIERTO",
-  "CORCHETE_CERRADO"
+  "CORCHETE_CERRADO",
+  "PORCENTAJE"
   };
 }
 

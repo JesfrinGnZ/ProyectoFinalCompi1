@@ -19,22 +19,26 @@ public class ManejadorDeArbol implements Visitor{
 
     @Override
     public double vist(Division div) {
-        return div.getValor1()/div.getValor2();
+        div.setResultado(div.getValor1()/div.getValor2());
+        return div.getResultado();
     }
 
     @Override
     public double vist(Multiplicacion mult) {
-        return mult.getValor1()*mult.getValor2();
+        mult.setResultado(mult.getValor1()*mult.getValor2());
+        return mult.getResultado();
     }
 
     @Override
     public double vist(Resta rest) {
-        return rest.getValor1()-rest.getValor2();
+        rest.setResultado(rest.getValor1()-rest.getValor2());
+        return rest.getResultado();
     }
 
     @Override
     public double vist(Suma sum) {
-        return sum.getValor1()+sum.getValor2();
+        sum.setResultado(sum.getValor1()+sum.getValor2());
+        return sum.getResultado();
     }
     
     

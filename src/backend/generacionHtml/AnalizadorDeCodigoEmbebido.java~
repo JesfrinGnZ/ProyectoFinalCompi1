@@ -206,11 +206,11 @@ public class AnalizadorDeCodigoEmbebido implements java_cup.runtime.Scanner {
     "\1\0\1\1\2\2\1\3\2\4\11\3\1\5\1\6"+
     "\1\7\1\10\1\11\1\12\1\13\1\14\1\15\1\16"+
     "\2\3\1\17\1\20\1\21\1\22\1\23\1\1\1\4"+
-    "\1\24\2\3\1\25\1\3\1\26\5\3\1\27\5\3"+
-    "\2\0\1\30\1\31\1\32\3\3\1\33\5\3\1\34"+
-    "\2\3\1\0\1\3\1\35\1\36\1\37\6\3\1\0"+
-    "\1\3\1\40\2\3\1\41\1\42\1\43\1\0\2\3"+
-    "\1\44\2\0\1\45\1\46\5\0\1\47";
+    "\3\3\1\24\1\3\1\25\5\3\1\26\5\3\2\0"+
+    "\1\27\1\30\1\31\3\3\1\32\5\3\1\33\2\3"+
+    "\1\0\1\3\1\34\1\35\1\36\6\3\1\0\1\3"+
+    "\1\37\2\3\1\40\1\41\1\42\1\0\2\3\1\43"+
+    "\2\0\1\44\1\45\5\0\1\46";
 
   private static int [] zzUnpackAction() {
     int [] result = new int[102];
@@ -881,200 +881,195 @@ public class AnalizadorDeCodigoEmbebido implements java_cup.runtime.Scanner {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1: 
-            { miFrame.escribirMensaje("Error lexico no entiendo el token:"+yytext()+"\n");return symbol(ERROR_LEXICO);
+            { /*Error lexico*/
             } 
             // fall through
-          case 40: break;
+          case 39: break;
           case 2: 
             { /*IGNORAMOS*/
             } 
             // fall through
-          case 41: break;
+          case 40: break;
           case 3: 
             { return symbol(IDENTIFICADOR,yytext());
             } 
             // fall through
-          case 42: break;
+          case 41: break;
           case 4: 
             { return symbol(NUMERO,yytext());
             } 
             // fall through
-          case 43: break;
+          case 42: break;
           case 5: 
             { return symbol(MAS,yytext());
             } 
             // fall through
-          case 44: break;
+          case 43: break;
           case 6: 
             { return symbol(MENOS,yytext());
             } 
             // fall through
-          case 45: break;
+          case 44: break;
           case 7: 
             { return symbol(POR,yytext());
             } 
             // fall through
-          case 46: break;
+          case 45: break;
           case 8: 
             { return symbol(DIV,yytext());
             } 
             // fall through
-          case 47: break;
+          case 46: break;
           case 9: 
             { return symbol(MAYOR,yytext());
             } 
             // fall through
-          case 48: break;
+          case 47: break;
           case 10: 
             { return symbol(MENOR,yytext());
             } 
             // fall through
-          case 49: break;
+          case 48: break;
           case 11: 
             { return symbol(DOS_PUNTOS,yytext());
             } 
             // fall through
-          case 50: break;
+          case 49: break;
           case 12: 
             { return symbol(IGUAL,yytext());
             } 
             // fall through
-          case 51: break;
+          case 50: break;
           case 13: 
             { return symbol(PARENTESIS_ABIERTO,yytext());
             } 
             // fall through
-          case 52: break;
+          case 51: break;
           case 14: 
             { return symbol(PARENTESIS_CERRADO,yytext());
             } 
             // fall through
-          case 53: break;
+          case 52: break;
           case 15: 
             { return symbol(COMA,yytext());
             } 
             // fall through
-          case 54: break;
+          case 53: break;
           case 16: 
             { return symbol(PUNTO_COMA,yytext());
             } 
             // fall through
-          case 55: break;
+          case 54: break;
           case 17: 
             { return symbol(CORCHETE_ABIERTO,yytext());
             } 
             // fall through
-          case 56: break;
+          case 55: break;
           case 18: 
             { return symbol(CORCHETE_CERRADO,yytext());
             } 
             // fall through
-          case 57: break;
+          case 56: break;
           case 19: 
             { return symbol(PORCENTAJE,yytext());
             } 
             // fall through
-          case 58: break;
+          case 57: break;
           case 20: 
-            { return symbol(0);
-            } 
-            // fall through
-          case 59: break;
-          case 21: 
             { return symbol(IF,yytext());
             } 
             // fall through
-          case 60: break;
-          case 22: 
+          case 58: break;
+          case 21: 
             { return symbol(TO,yytext());
             } 
             // fall through
-          case 61: break;
-          case 23: 
+          case 59: break;
+          case 22: 
             { return symbol(OR,yytext());
             } 
             // fall through
-          case 62: break;
-          case 24: 
+          case 60: break;
+          case 23: 
             { return symbol(ORACION,yytext());
             } 
             // fall through
-          case 63: break;
-          case 25: 
+          case 61: break;
+          case 24: 
             { return symbol(VAR,yytext());
             } 
             // fall through
-          case 64: break;
-          case 26: 
+          case 62: break;
+          case 25: 
             { return symbol(AND,yytext());
             } 
             // fall through
-          case 65: break;
-          case 27: 
+          case 63: break;
+          case 26: 
             { return symbol(END,yytext());
             } 
             // fall through
-          case 66: break;
-          case 28: 
+          case 64: break;
+          case 27: 
             { return symbol(FOR,yytext());
             } 
             // fall through
-          case 67: break;
-          case 29: 
+          case 65: break;
+          case 28: 
             { return symbol(TRUE,yytext());
             } 
             // fall through
-          case 68: break;
-          case 30: 
+          case 66: break;
+          case 29: 
             { return symbol(THEN,yytext());
             } 
             // fall through
-          case 69: break;
-          case 31: 
+          case 67: break;
+          case 30: 
             { return symbol(ELSE,yytext());
             } 
             // fall through
-          case 70: break;
-          case 32: 
+          case 68: break;
+          case 31: 
             { return symbol(BEGIN,yytext());
             } 
             // fall through
-          case 71: break;
-          case 33: 
+          case 69: break;
+          case 32: 
             { return symbol(FALSE,yytext());
             } 
             // fall through
-          case 72: break;
-          case 34: 
+          case 70: break;
+          case 33: 
             { return symbol(WHILE,yytext());
             } 
             // fall through
-          case 73: break;
-          case 35: 
+          case 71: break;
+          case 34: 
             { return symbol(PRINT,yytext());
             } 
             // fall through
-          case 74: break;
-          case 36: 
+          case 72: break;
+          case 35: 
             { return symbol(STRING,yytext());
             } 
             // fall through
-          case 75: break;
-          case 37: 
+          case 73: break;
+          case 36: 
             { return symbol(INTEGER,yytext());
             } 
             // fall through
-          case 76: break;
-          case 38: 
+          case 74: break;
+          case 37: 
             { return symbol(BOOLEAN,yytext());
             } 
             // fall through
-          case 77: break;
-          case 39: 
+          case 75: break;
+          case 38: 
             { return symbol(URL,yytext());
             } 
             // fall through
-          case 78: break;
+          case 76: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }

@@ -13,7 +13,13 @@ public class OperacionAritmetica {
 
     private double valor1;
     private double valor2;
+    private double resultado;
 
+    public OperacionAritmetica() {
+    }
+
+    
+    
     public double getValor1(){
         return this.valor1;
     }
@@ -28,5 +34,13 @@ public class OperacionAritmetica {
 
     public void setValor2(String valor) {
         this.valor2 = Double.parseDouble(valor);
+    }
+
+    public double getResultado() {
+        return resultado;
+    }
+
+    public void setResultado(double resultado) {
+        this.resultado = resultado;
     }
 }

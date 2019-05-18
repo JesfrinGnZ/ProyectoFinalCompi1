@@ -11,16 +11,23 @@ import java.util.ArrayList;
  *
  * @author jesfrin
  */
-public class Nodo {
+public class Nodo<T> {
     
+    private T objeto;
     private String tipo;//Para saber que accion reealizar
     private String valor;//Valor RESULT
     private Nodo padre;
     private ArrayList<Nodo> nodosHijos;
 
-    public Nodo(String tipo,String valor){
+    public Nodo(String tipo,String valor){//Nodo hojas
         this.tipo=tipo;
         this.valor=valor;
+        this.nodosHijos=null;
+    }
+    
+    public Nodo(T objeto){//Nodo interno
+        this.objeto=objeto;
+        this.nodosHijos=new ArrayList<>();
     }
     
     public Nodo(String tipo, String valor,Nodo padre) {
@@ -60,6 +67,14 @@ public class Nodo {
 
     public void setNodosHijos(ArrayList<Nodo> nodosHijos) {
         this.nodosHijos = nodosHijos;
+    }
+
+    public T getObjeto() {
+        return objeto;
+    }
+
+    public void setObjeto(T objeto) {
+        this.objeto = objeto;
     }
     
     
