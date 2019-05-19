@@ -5,6 +5,9 @@
  */
 package backend.expresionesAritmeticas;
 
+import backend.expresiones.Expresion;
+import backend.expresiones.Identificador;
+import backend.expresiones.OperacionBinaria;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
 
@@ -21,12 +24,8 @@ public class ManejadorDeExpresionesAritmeticas {
         this.manejadorDeVariables=man;
         this.existioErrorAlRealizarLaOperacion=false;
     }
-
     
-    
-    
-    
-    public Integer recorridoDeOperaciones(ExpresionMatematica expresion) {
+    public Integer recorridoDeOperaciones(Expresion expresion) {
         int valor = 0;
         int val1;
         int val2;
@@ -40,8 +39,8 @@ public class ManejadorDeExpresionesAritmeticas {
             } else if (expresion instanceof Operando) {
                 Operando op = ((Operando) expresion);
                 valor = op.getValor();
-            } else if (expresion instanceof IdentificadorTipoInt) {
-                IdentificadorTipoInt op=((IdentificadorTipoInt)expresion);
+            } else if (expresion instanceof Identificador) {
+                Identificador op=((Identificador)expresion);
                 //Buscamos la variable
                 Variable var=this.manejadorDeVariables.verificarSiExisteVariable(op.getId());
                 if(var==null){//Si variable existe y es de tipo entera
@@ -55,6 +54,9 @@ public class ManejadorDeExpresionesAritmeticas {
                 }else{
                     valor=Integer.valueOf(var.getValorDeVariable());
                 }
+            }else{
+                this.existioErrorAlRealizarLaOperacion=true;
+                System.out.println("Error la expresion tiene errores");//Por si viene una oracion
             }
             return valor;
         } else {

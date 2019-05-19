@@ -3,20 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package backend.expresionesAritmeticas;
+package backend.expresiones;
 
 /**
  *
  * @author jesfrin
  */
-public class IdentificadorTipoInt extends ExpresionMatematica{
-    
+public class Identificador extends Expresion {
+
+
     private String id;
-    
-    public IdentificadorTipoInt(int numeroDeLinea,int numeroDeColumna,String id){
-        this.numeroDeLinea=numeroDeLinea;
-        this.numeroDeColumna=numeroDeColumna;
-        this.id=id;
+
+    public Identificador(int numeroDeLinea, int numeroDeColumna, String id) {
+        this.numeroDeLinea = numeroDeLinea;
+        this.numeroDeColumna = numeroDeColumna;
+        this.id = id;
     }
 
     public String getId() {
@@ -26,7 +27,6 @@ public class IdentificadorTipoInt extends ExpresionMatematica{
     public void setId(String id) {
         this.id = id;
     }
-
 
     @Override
     public int getNumeroDeLinea() {
@@ -47,8 +47,5 @@ public class IdentificadorTipoInt extends ExpresionMatematica{
     public void setNumeroDeColumna(int numeroDeColumna) {
         this.numeroDeColumna = numeroDeColumna;
     }
-    
-    
-    
-    
+
 }

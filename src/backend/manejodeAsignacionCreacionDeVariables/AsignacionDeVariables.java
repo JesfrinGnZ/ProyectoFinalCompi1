@@ -3,21 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package backend.variablesEnteras;
+package backend.manejodeAsignacionCreacionDeVariables;
 
 import backend.arbolAST.Nodo;
-import backend.expresionesAritmeticas.ExpresionMatematica;
+import backend.expresiones.Expresion;
 
 /**
  *
  * @author jesfrin
  */
-public class AsignacionEntero extends Nodo {
+public class AsignacionDeVariables extends Nodo {
 
     private String nombre;
-    private ExpresionMatematica expresion;
+    private Expresion expresion;
 
-    public AsignacionEntero(int numeroDeColumna, int numeroDeLinea, String nombre, ExpresionMatematica expresion) {
+    public AsignacionDeVariables(int numeroDeColumna, int numeroDeLinea, String nombre, Expresion expresion) {
         this.numeroDeColumna=numeroDeColumna;
         this.numeroDeLinea=numeroDeLinea;
         this.nombre=nombre;
@@ -32,11 +32,11 @@ public class AsignacionEntero extends Nodo {
         this.nombre = nombre;
     }
 
-    public ExpresionMatematica getExpresion() {
+    public Expresion getExpresion() {
         return expresion;
     }
 
-    public void setExpresion(ExpresionMatematica expresion) {
+    public void setExpresion(Expresion expresion) {
         this.expresion = expresion;
     }
 

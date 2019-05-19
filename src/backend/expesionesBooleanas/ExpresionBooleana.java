@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package backend.expresionesConCadenas;
+package backend.expesionesBooleanas;
 
 import backend.expresiones.Expresion;
 
@@ -11,6 +11,6 @@ import backend.expresiones.Expresion;
  *
  * @author jesfrin
  */
-public abstract class ExpresionConCadena extends Expresion{
+public abstract class ExpresionBooleana extends Expresion{
     
 }

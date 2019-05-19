@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package backend.expresionesConCadenas;
+package backend.expresiones;
 
-import backend.expresiones.Expresion;
+import backend.arbolAST.Nodo;
 
 /**
  *
  * @author jesfrin
  */
-public abstract class ExpresionConCadena extends Expresion{
-    
+public abstract class Expresion extends Nodo{
 }

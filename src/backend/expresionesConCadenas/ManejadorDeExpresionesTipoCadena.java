@@ -5,6 +5,9 @@
  */
 package backend.expresionesConCadenas;
 
+import backend.expresiones.Expresion;
+import backend.expresiones.Identificador;
+import backend.expresiones.OperacionBinaria;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
 
@@ -22,21 +25,25 @@ public class ManejadorDeExpresionesTipoCadena {
         this.existioErrorAlRealizarLaOperacion = false;
     }
 
-    public String recorridoDeOperaciones(ExpresionConCadena expresion) {
+    public String recorridoDeOperaciones(Expresion expresion) {
         String valor = "";
         String val1;
         String val2;
         if (!this.existioErrorAlRealizarLaOperacion) {
-            if (expresion instanceof OperacionBinariaCadena) {
-                OperacionBinariaCadena op = ((OperacionBinariaCadena) expresion);
-                val1 = recorridoDeOperaciones(op.getEx1());
-                val2 = recorridoDeOperaciones(op.getEx2());
-                valor = val1 + val2;
+            if (expresion instanceof OperacionBinaria) {
+                OperacionBinaria op = ((OperacionBinaria) expresion);
+                if (op.getOperacion().equals("+")) {
+                    val1 = recorridoDeOperaciones(op.getEx1());
+                    val2 = recorridoDeOperaciones(op.getEx2());
+                    valor = val1 + val2;
+                }else{
+                    this.existioErrorAlRealizarLaOperacion=true;
+                }
             } else if (expresion instanceof Cadena) {
                 Cadena op = ((Cadena) expresion);
                 valor = op.getCadena();
-            } else if (expresion instanceof IdentificadorTipoCadena) {
-                IdentificadorTipoCadena op = ((IdentificadorTipoCadena) expresion);
+            } else if (expresion instanceof Identificador) {
+                Identificador op = ((Identificador) expresion);
                 Variable var = manejadorDeVariables.verificarSiExisteVariable(op.getId());
                 if (var == null) {//Si variable existe y es de tipo entera
                     //Error semantico, la variable no ha sido declarada
@@ -46,9 +53,12 @@ public class ManejadorDeExpresionesTipoCadena {
                     //Error semantico la variable no es de tipo entero
                     this.existioErrorAlRealizarLaOperacion = true;
                     System.out.println("Error semantico, tipos incompatibles:STRING no se puede convertir a " + var.getTipoDeVariable());
-                }else{
+                } else {
                     valor = var.getValorDeVariable();
                 }
+            } else {
+                this.existioErrorAlRealizarLaOperacion = true;
+                System.out.println("Error ya ya que contiene tipos incompatibles");
             }
         }
         return valor;

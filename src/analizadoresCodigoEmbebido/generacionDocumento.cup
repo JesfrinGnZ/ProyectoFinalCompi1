@@ -5,10 +5,12 @@ package backend.generacionHtml;
 import java_cup.runtime.*;
 import backend.arbol.*;
 import backend.AccionesMatematicas.*;
+
+import backend.asignacionCreacionDeVariables.*;
+import backend.expresiones.*;
 import backend.expresionesAritmeticas.*;
 import backend.expresionesConCadenas.*;
 import backend.tablaDeSimbolos.*;
-import backend.variablesEnteras.*;
 import java.util.ArrayList;
 
 
@@ -26,12 +28,12 @@ parser code {:
 
     //Metodo al que se llama automaticamente ante algun error sintactico
     public void syntax_error(Symbol s){        
-        //System.out.println("ERROR EN ESTRUCTURA");
+        System.out.println("ERROR EN ESTRUCTURA:"+s);
     }
 
     //Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{        
-                //System.out.println("ERROR EN ESTRUCTURA");
+                System.out.println("ERROR EN ESTRUCTURA:"+s);
     }
 
 :}
@@ -94,7 +96,7 @@ non terminal String declaracionDeVariable,asignacionDeVariable;
 
 
 /****************************************Expresiones Aritmeticas***********************/
-non terminal ExpresionMatematica     expresion,t,f; //Expresiones matematicas
+non terminal Expresion     expresion,t,f; //Expresiones matematicas
 
 /****************************************Expresiones Con cadenas***********************/
 
@@ -116,22 +118,29 @@ unaInstruccion::=asignacionDeVariable;
  //----------------------------------------------------Declaracion de variables-------------------------------
 
 declaracionDeVariable::=VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
-                        {:AsignacionEntero asignacion = new AsignacionEntero(aright,aleft,i, null);
-                          ManejadorAsignacionesEnteras.recorridoDeAsignaciones(asignacion,manejadorDeVariables);:}|
+                        {:Variable variable = new Variable(ileft,iright,i,"entera","0");
+                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
+                        man.crearVariable();:}|
                         VAR IDENTIFICADOR:i DOS_PUNTOS BOOLEAN:e PUNTO_COMA
-                        {::}|
+                        {:Variable variable = new Variable(ileft,iright,i,"booleana","true");
+                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
+                        man.crearVariable();:}|
                         VAR IDENTIFICADOR:i DOS_PUNTOS STRING:e PUNTO_COMA
-                        {::};
+                        {:Variable variable = new Variable(ileft,iright,i,"cadena","");
+                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
+                        man.crearVariable();:};
  //----------------------------------------------------Asignacion de variables-------------------------------
 
 asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
-                        {:AsignacionEntero asignacion = new AsignacionEntero(iright,ileft,i, e);
-                          ManejadorAsignacionesEnteras.recorridoDeAsignaciones(asignacion,manejadorDeVariables);:};
+                        {:Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
+                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion);
+                        nuevaAsignacion.asignacionDeVariable();:};
                         
 asignacionDeVariable::=IDENTIFICADOR DOS_PUNTOS IGUAL expresionCadena PUNTO_COMA;
+
  //----------------------------------------------------EXPRESIONES CON CADENAS-------------------------------
 
-expresionCadena::=expresionCadena:i MAS cadena:e
+/*expresionCadena::=expresionCadena:i MAS cadena:e
                   {:RESULT= new OperacionBinariaCadena(ileft,iright,i,e);:};
 
 expresionCadena::= cadena:i
@@ -142,6 +151,8 @@ cadena::= tipoDeCadena:i
 
 tipoDeCadena::= ORACION:i
                 {:RESULT=new Cadena(ileft,iright,i);:};
+
+*/
 
 
 
@@ -179,8 +190,10 @@ t::=f:i
 
 
 f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
-    {:RESULT=new IdentificadorTipoInt(ileft,iright,i);:};
+    {:RESULT=new Identificador(ileft,iright,i);:};
 
 f::=NUMERO:i
     {:RESULT= new Operando(iright,ileft, i);:};
 
+f::= ORACION:i
+     {:RESULT=new Cadena(ileft,iright,i);:};

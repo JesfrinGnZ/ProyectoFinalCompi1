@@ -5,11 +5,11 @@
  */
 package backend.expresionesAritmeticas;
 
-import backend.arbolAST.Nodo;
+import backend.expresiones.Expresion;
 
 /**
  *
  * @author jesfrin
  */
-public abstract class ExpresionMatematica extends Nodo{
+public abstract class ExpresionMatematica extends Expresion{
 }
