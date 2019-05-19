@@ -5,16 +5,23 @@ package backend.generacionHtml;
 import java_cup.runtime.*;
 import backend.arbol.*;
 import backend.AccionesMatematicas.*;
+import backend.expresionesAritmeticas.*;
+import backend.expresionesConCadenas.*;
+import backend.tablaDeSimbolos.*;
+import backend.variablesEnteras.*;
+import java.util.ArrayList;
 
 
 parser code {:
 
-    Nodo nodo1=null;
-    Nodo nodo2=null;
+    private ArrayList<Variable> tablaDeSimbolos;
+    private ManejadorDeTablaDeSimbolos manejadorDeVariables;//----->Quizas no lo necesitemos
 
     // Connect this parser to a scanner!
-    public parser(AnalizadorDeCodigoEmbebido lex) {
+    public parser(AnalizadorDeCodigoEmbebido lex,ArrayList<Variable> tablaDeSimbolos) {
 	super(lex);
+        this.tablaDeSimbolos=tablaDeSimbolos;
+        this.manejadorDeVariables = new ManejadorDeTablaDeSimbolos(tablaDeSimbolos);
     }
 
     //Metodo al que se llama automaticamente ante algun error sintactico
@@ -78,38 +85,82 @@ terminal String         MAS,MENOS,POR,DIV,MAYOR,MENOR,DOS_PUNTOS,IGUAL,PARENTESI
 
 //--------------------------------------------NO TERMINALES-------------------------------------
 
-non terminal Object     operacion;//Inicio de gramatica
+//non terminal Object     operacion;//Inicio de gramatica
 
-non terminal Nodo     expresion,t,f; //Expresiones matematicas
+
+/****************************************Asignaciones***********************/
+
+non terminal String declaracionDeVariable,asignacionDeVariable;
+
+
+/****************************************Expresiones Aritmeticas***********************/
+non terminal ExpresionMatematica     expresion,t,f; //Expresiones matematicas
+
+/****************************************Expresiones Con cadenas***********************/
+
+non terminal ExpresionConCadena     expresionCadena,cadena,tipoDeCadena;
+
+
 
 non terminal Object     conjuntoDeInstrucciones,unaInstruccion;
 /*--------------- 3ra Area: Reglas Semanticas -----------------------*/
 
-start with operacion;
+start with conjuntoDeInstrucciones;
+
+
+
+conjuntoDeInstrucciones::= conjuntoDeInstrucciones unaInstruccion | unaInstruccion;
+unaInstruccion::=declaracionDeVariable;
+unaInstruccion::=asignacionDeVariable;
+
+ //----------------------------------------------------Declaracion de variables-------------------------------
+
+declaracionDeVariable::=VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
+                        {:AsignacionEntero asignacion = new AsignacionEntero(aright,aleft,i, null);
+                          ManejadorAsignacionesEnteras.recorridoDeAsignaciones(asignacion,manejadorDeVariables);:}|
+                        VAR IDENTIFICADOR:i DOS_PUNTOS BOOLEAN:e PUNTO_COMA
+                        {::}|
+                        VAR IDENTIFICADOR:i DOS_PUNTOS STRING:e PUNTO_COMA
+                        {::};
+ //----------------------------------------------------Asignacion de variables-------------------------------
+
+asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
+                        {:AsignacionEntero asignacion = new AsignacionEntero(iright,ileft,i, e);
+                          ManejadorAsignacionesEnteras.recorridoDeAsignaciones(asignacion,manejadorDeVariables);:};
+                        
+asignacionDeVariable::=IDENTIFICADOR DOS_PUNTOS IGUAL expresionCadena PUNTO_COMA;
+ //----------------------------------------------------EXPRESIONES CON CADENAS-------------------------------
+
+expresionCadena::=expresionCadena:i MAS cadena:e
+                  {:RESULT= new OperacionBinariaCadena(ileft,iright,i,e);:};
+
+expresionCadena::= cadena:i
+                   {:RESULT=i;:};
+
+cadena::= tipoDeCadena:i
+          {:RESULT=i;:};
+
+tipoDeCadena::= ORACION:i
+                {:RESULT=new Cadena(ileft,iright,i);:};
+
 
 
  //----------------------------------------------------EXPRESIONES MATEMATICAS-------------------------------
 
-operacion::=expresion:t 
-  {:System.out.println(t);
-    Arbol arbol = new Arbol(t);
-    arbol.evaluar();:};
+//operacion::=expresion:t 
+//  {:ManejadorDeExpresionesAritmeticas man= new ManejadorDeExpresionesAritmeticas(manejadorDeVariables);
+//    int valor=man.recorridoDeOperaciones(t);
+//    System.out.println("Valor calculado de operacion nueva:"+valor);
+// :};
 
 expresion::=expresion:i MAS t:e
     {:System.out.println(i+"+"+e);
-    Suma s = new Suma();
-    Nodo<Division> n= new Nodo(s);
-    n.getNodosHijos().add(i);
-    n.getNodosHijos().add(e);
-    RESULT=n;:};
+    RESULT= new OperacionBinaria(iright, ileft, i, e,"+");:};
 
 expresion::=expresion:i MENOS t:e
     {:System.out.println(i+"-"+e);
-    Resta r = new Resta();
-    Nodo<Resta> n= new Nodo(r);
-    n.getNodosHijos().add(i);
-    n.getNodosHijos().add(e);
-    RESULT=n;:};
+    RESULT= new OperacionBinaria(iright, ileft, i, e,"-");
+    :};
 
 expresion::=t:i
     {:RESULT=i;:};
@@ -117,27 +168,19 @@ expresion::=t:i
 
 t::=t:i POR f:e
     {:System.out.println(i+"*"+e);
-    Multiplicacion m = new Multiplicacion();
-    Nodo<Multiplicacion> n= new Nodo(m);
-    n.getNodosHijos().add(i);
-    n.getNodosHijos().add(e);
-    RESULT=n;:};
+     RESULT= new OperacionBinaria(iright, ileft, i, e,"*");:};
 
 t::=t:i DIV f:e
     {:System.out.println(i+"/"+e);
-    Division d = new Division();
-    Nodo<Division> n= new Nodo(d);
-    n.getNodosHijos().add(i);
-    n.getNodosHijos().add(e);
-    RESULT=n;:};
+    RESULT= new OperacionBinaria(iright, ileft, i, e,"/");:};
 
 t::=f:i
-    {:RESULT=new Nodo("int",i.getValor());;:};
+    {:RESULT=i;:};
 
 
-//f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
-//    {:RESULT=i;:};
+f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
+    {:RESULT=new IdentificadorTipoInt(ileft,iright,i);:};
 
 f::=NUMERO:i
-    {:RESULT=new Nodo("int",i);:};
+    {:RESULT= new Operando(iright,ileft, i);:};
 

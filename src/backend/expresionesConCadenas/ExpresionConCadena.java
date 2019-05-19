@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package backend.Expresiones;
+package backend.expresionesConCadenas;
 
 import backend.arbolAST.Nodo;
 
@@ -11,5 +11,6 @@ import backend.arbolAST.Nodo;
  *
  * @author jesfrin
  */
-public abstract class Expresion extends Nodo{
+public abstract class ExpresionConCadena extends Nodo{
+    
 }
