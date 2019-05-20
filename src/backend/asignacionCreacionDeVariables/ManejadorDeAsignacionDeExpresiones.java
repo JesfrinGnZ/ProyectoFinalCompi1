@@ -33,15 +33,29 @@ public class ManejadorDeAsignacionDeExpresiones {
             switch (var.getTipoDeVariable()) {
                 case "entera":
                     ManejadorDeExpresionesAritmeticas man=new ManejadorDeExpresionesAritmeticas(this.manejadorDeVariables);
-                    man.recorridoDeOperaciones(this.asignacion.getExpresion());
+                    int nuevoValor=man.recorridoDeOperaciones(this.asignacion.getExpresion());
+                    if(!man.existioErrorAlRealizarLaOperacion()){
+                        this.asignacion.getVariable().setValorDeVariable(String.valueOf(nuevoValor));
+                        System.out.println("Id:"+this.asignacion.getVariable().getNombreDeVariable()+" Valor:"+this.asignacion.getVariable().getValorDeVariable());
+                    }else{
+                        System.out.println("No se ha asignado la variable:"+this.asignacion.getVariable().getNombreDeVariable());
+                    }
                     break;
                 case "cadena":
                     ManejadorDeExpresionesTipoCadena man2=new ManejadorDeExpresionesTipoCadena(this.manejadorDeVariables);
-                    man2.recorridoDeOperaciones(this.asignacion.getExpresion());
+                    String nuevoValor1=man2.recorridoDeOperaciones(this.asignacion.getExpresion());
+                    if(!man2.existioErrorAlRealizarLaOperacion()){
+                        this.asignacion.getVariable().setValorDeVariable(nuevoValor1);
+                        System.out.println("Id:"+this.asignacion.getVariable().getNombreDeVariable()+" Valor:"+this.asignacion.getVariable().getValorDeVariable());
+                    }else{
+                        System.out.println("No se ha asignado la variable:"+this.asignacion.getVariable().getNombreDeVariable());
+                    }
                     break;
                 case "booleana":
+                    
                     break;
                 default:
+                    System.out.println("No se encontro el tipo de variable");
                     break;
             }
         }

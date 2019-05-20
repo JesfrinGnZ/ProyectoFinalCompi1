@@ -37,6 +37,7 @@ public class ManejadorDeExpresionesTipoCadena {
                     val2 = recorridoDeOperaciones(op.getEx2());
                     valor = val1 + val2;
                 }else{
+                    System.out.println("Operacion no valida en cadenas");
                     this.existioErrorAlRealizarLaOperacion=true;
                 }
             } else if (expresion instanceof Cadena) {
@@ -63,4 +64,14 @@ public class ManejadorDeExpresionesTipoCadena {
         }
         return valor;
     }
+
+    public boolean existioErrorAlRealizarLaOperacion() {
+        return existioErrorAlRealizarLaOperacion;
+    }
+
+    public void setExistioErrorAlRealizarLaOperacion(boolean existioErrorAlRealizarLaOperacion) {
+        this.existioErrorAlRealizarLaOperacion = existioErrorAlRealizarLaOperacion;
+    }
+    
+    
 }

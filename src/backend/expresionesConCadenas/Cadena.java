@@ -16,7 +16,7 @@ public class Cadena extends ExpresionConCadena{
     public Cadena(int numeroDeLinea,int numeroDeColumna,String cadena){
         this.numeroDeLinea=numeroDeLinea;
         this.numeroDeColumna=numeroDeColumna;
-        this.cadena=cadena;
+        this.cadena=cadena.substring(1,cadena.length()-1);
     }
 
     public String getCadena() {

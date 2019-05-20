@@ -98,6 +98,7 @@ non terminal String declaracionDeVariable,asignacionDeVariable;
 /****************************************Expresiones Aritmeticas***********************/
 non terminal Expresion     expresion,t,f; //Expresiones matematicas
 
+non terminal Object        expresionesBooleanas,exB,exB1;
 /****************************************Expresiones Con cadenas***********************/
 
 non terminal ExpresionConCadena     expresionCadena,cadena,tipoDeCadena;
@@ -134,35 +135,35 @@ declaracionDeVariable::=VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
 asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
                         {:Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
                         ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion);
-                        nuevaAsignacion.asignacionDeVariable();:};
+                        nuevaAsignacion.asignacionDeVariable();:}|
+                        IDENTIFICADOR:i DOS_PUNTOS IGUAL  PUNTO_COMA{::};    
                         
 asignacionDeVariable::=IDENTIFICADOR DOS_PUNTOS IGUAL expresionCadena PUNTO_COMA;
 
- //----------------------------------------------------EXPRESIONES CON CADENAS-------------------------------
+ //----------------------------------------------------EXPRESIONES CON BOOLEANOS-------------------------------
+/*
+expresionesBooleanas::= expresionesBooleanas OR exB;
 
-/*expresionCadena::=expresionCadena:i MAS cadena:e
-                  {:RESULT= new OperacionBinariaCadena(ileft,iright,i,e);:};
+expresionesBooleanas::=exB;
 
-expresionCadena::= cadena:i
-                   {:RESULT=i;:};
+exB::=  exB AND exB1;
 
-cadena::= tipoDeCadena:i
-          {:RESULT=i;:};
+exB::=  exB1;
 
-tipoDeCadena::= ORACION:i
-                {:RESULT=new Cadena(ileft,iright,i);:};
+exB1::= expresion MAYOR expresion;
 
+exB1::= expresion MENOR expresion;
+
+exB1::= expresion MAYOR IGUAL expresion;
+
+exB1::= expresion MENOR IGUAL expresion;
+
+exB1::= expresion MAYOR MENOR expresion;
+
+exB1::= IDENTIFICADOR;
 */
+ //----------------------------------------------------EXPRESIONES MATEMATICAS Y CON CADENAS-------------------------------
 
-
-
- //----------------------------------------------------EXPRESIONES MATEMATICAS-------------------------------
-
-//operacion::=expresion:t 
-//  {:ManejadorDeExpresionesAritmeticas man= new ManejadorDeExpresionesAritmeticas(manejadorDeVariables);
-//    int valor=man.recorridoDeOperaciones(t);
-//    System.out.println("Valor calculado de operacion nueva:"+valor);
-// :};
 
 expresion::=expresion:i MAS t:e
     {:System.out.println(i+"+"+e);
@@ -176,7 +177,6 @@ expresion::=expresion:i MENOS t:e
 expresion::=t:i
     {:RESULT=i;:};
 
-
 t::=t:i POR f:e
     {:System.out.println(i+"*"+e);
      RESULT= new OperacionBinaria(iright, ileft, i, e,"*");:};
@@ -185,9 +185,9 @@ t::=t:i DIV f:e
     {:System.out.println(i+"/"+e);
     RESULT= new OperacionBinaria(iright, ileft, i, e,"/");:};
 
+
 t::=f:i
     {:RESULT=i;:};
-
 
 f::=IDENTIFICADOR:i//Se debe buscar el identificador, y si se encuenra RESULT=valor de lo contrario mostrar error
     {:RESULT=new Identificador(ileft,iright,i);:};
