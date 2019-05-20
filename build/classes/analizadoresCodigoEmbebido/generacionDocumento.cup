@@ -9,6 +9,7 @@ import backend.AccionesMatematicas.*;
 import backend.asignacionCreacionDeVariables.*;
 import backend.expresiones.*;
 import backend.expresionesAritmeticas.*;
+import backend.expesionesBooleanas.*;
 import backend.expresionesConCadenas.*;
 import backend.tablaDeSimbolos.*;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ non terminal String declaracionDeVariable,asignacionDeVariable;
 /****************************************Expresiones Aritmeticas***********************/
 non terminal Expresion     expresion,t,f; //Expresiones matematicas
 
-non terminal Object        expresionesBooleanas,exB,exB1;
+non terminal Expresion        expresionesBooleanas,exB,exB1;
 /****************************************Expresiones Con cadenas***********************/
 
 non terminal ExpresionConCadena     expresionCadena,cadena,tipoDeCadena;
@@ -107,6 +108,10 @@ non terminal ExpresionConCadena     expresionCadena,cadena,tipoDeCadena;
 
 non terminal Object     conjuntoDeInstrucciones,unaInstruccion;
 /*--------------- 3ra Area: Reglas Semanticas -----------------------*/
+
+precedence left OR;
+precedence left AND;
+
 
 start with conjuntoDeInstrucciones;
 
@@ -136,14 +141,62 @@ asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
                         {:Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
                         ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion);
                         nuevaAsignacion.asignacionDeVariable();:}|
-                        IDENTIFICADOR:i DOS_PUNTOS IGUAL  PUNTO_COMA{::};    
+                        IDENTIFICADOR:i DOS_PUNTOS IGUAL expresionesBooleanas:e PUNTO_COMA
+                        {:System.out.println("Asignacion a booleana");
+                        Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
+                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion);
+                        nuevaAsignacion.asignacionDeVariable();:};    
                         
-asignacionDeVariable::=IDENTIFICADOR DOS_PUNTOS IGUAL expresionCadena PUNTO_COMA;
 
  //----------------------------------------------------EXPRESIONES CON BOOLEANOS-------------------------------
-/*
-expresionesBooleanas::= expresionesBooleanas OR exB;
 
+expresionesBooleanas::= expresionesBooleanas:i OR  expresion:e
+{:RESULT=new OperacionBooleana(ileft,iright,"or", i,e);:};
+
+expresionesBooleanas::= expresionesBooleanas:i AND  expresion:e
+{:RESULT=new OperacionBooleana(ileft,iright,"and", i,e);:};
+
+
+expresionesBooleanas::= expresionesBooleanas:i OR expresionesBooleanas:e
+{:RESULT=new OperacionBooleana(ileft,iright,"or",i,e);:};
+
+expresionesBooleanas::= expresionesBooleanas:i AND expresionesBooleanas:e
+{:RESULT=new OperacionBooleana(ileft,iright,"and", i,e);:};
+
+expresionesBooleanas::=expresion:i OR expresion:e
+{:RESULT=new OperacionBooleana(ileft,iright,"or", i,e);:};
+
+expresionesBooleanas::=expresion:i AND expresion:e
+{:RESULT=new OperacionBooleana(ileft,iright,"and", i,e);:};
+
+expresionesBooleanas::=expresion:i OR expresionesBooleanas:e
+{:RESULT=new OperacionBooleana(ileft,iright,"or", i,e);:};
+
+expresionesBooleanas::=expresion:i AND expresionesBooleanas:e
+{:RESULT=new OperacionBooleana(ileft,iright,"and", i,e);:};
+
+
+expresionesBooleanas::=expresion:i MAYOR expresion:e
+{:RESULT= new Comparacion(ileft,iright,">",i,e);:};
+
+expresionesBooleanas::=expresion:i MENOR expresion:e
+{:RESULT= new Comparacion(ileft,iright,"<",i,e);:};
+
+expresionesBooleanas::=expresion:i MAYOR IGUAL expresion:e
+{:RESULT= new Comparacion(ileft,iright,">=",i,e);:};
+
+expresionesBooleanas::=expresion:i MENOR IGUAL expresion:e
+{:RESULT= new Comparacion(ileft,iright,"<=",i,e);:};
+
+expresionesBooleanas::=expresion:i IGUAL expresion:e
+{:RESULT= new Comparacion(ileft,iright,"=",i,e);:};
+
+expresionesBooleanas::=expresion:i MENOR MAYOR expresion:e
+{:RESULT= new Comparacion(ileft,iright,"<>",i,e);:};
+
+
+
+/*
 expresionesBooleanas::=exB;
 
 exB::=  exB AND exB1;
@@ -165,25 +218,21 @@ exB1::= IDENTIFICADOR;
  //----------------------------------------------------EXPRESIONES MATEMATICAS Y CON CADENAS-------------------------------
 
 
+
 expresion::=expresion:i MAS t:e
-    {:System.out.println(i+"+"+e);
-    RESULT= new OperacionBinaria(iright, ileft, i, e,"+");:};
+    {:RESULT= new OperacionBinaria(iright, ileft, i, e,"+");:};
 
 expresion::=expresion:i MENOS t:e
-    {:System.out.println(i+"-"+e);
-    RESULT= new OperacionBinaria(iright, ileft, i, e,"-");
-    :};
+    {:RESULT= new OperacionBinaria(iright, ileft, i, e,"-");:};
 
 expresion::=t:i
     {:RESULT=i;:};
 
 t::=t:i POR f:e
-    {:System.out.println(i+"*"+e);
-     RESULT= new OperacionBinaria(iright, ileft, i, e,"*");:};
+    {:RESULT= new OperacionBinaria(iright, ileft, i, e,"*");:};
 
 t::=t:i DIV f:e
-    {:System.out.println(i+"/"+e);
-    RESULT= new OperacionBinaria(iright, ileft, i, e,"/");:};
+    {:RESULT= new OperacionBinaria(iright, ileft, i, e,"/");:};
 
 
 t::=f:i
@@ -197,3 +246,9 @@ f::=NUMERO:i
 
 f::= ORACION:i
      {:RESULT=new Cadena(ileft,iright,i);:};
+
+f::=TRUE:i
+    {:RESULT= new ValorDeVerdad(ileft,iright,"true");:};
+
+f::=FALSE:i
+    {:RESULT= new ValorDeVerdad(ileft,iright,"false");:};
