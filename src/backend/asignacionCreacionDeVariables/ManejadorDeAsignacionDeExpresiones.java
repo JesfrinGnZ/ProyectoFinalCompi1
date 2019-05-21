@@ -20,10 +20,14 @@ public class ManejadorDeAsignacionDeExpresiones {
 
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;
     private Asignacion asignacion;
+    private boolean seDebeRealizarLaAsignacion;
+    private boolean errorEnAsignacion;
 
-    public ManejadorDeAsignacionDeExpresiones(ManejadorDeTablaDeSimbolos man, Asignacion asignacion) {
+    public ManejadorDeAsignacionDeExpresiones(ManejadorDeTablaDeSimbolos man, Asignacion asignacion, boolean seDebeRealizarLaAsignacion) {
         this.manejadorDeVariables = man;
         this.asignacion = asignacion;
+        this.seDebeRealizarLaAsignacion = seDebeRealizarLaAsignacion;
+        this.errorEnAsignacion = false;
     }
 
     public void asignacionDeVariable() {
@@ -36,19 +40,25 @@ public class ManejadorDeAsignacionDeExpresiones {
                     ManejadorDeExpresionesAritmeticas man = new ManejadorDeExpresionesAritmeticas(this.manejadorDeVariables);
                     int nuevoValor = man.recorridoDeOperaciones(this.asignacion.getExpresion());
                     if (!man.existioErrorAlRealizarLaOperacion()) {
-                        this.asignacion.getVariable().setValorDeVariable(String.valueOf(nuevoValor));
+                        if (seDebeRealizarLaAsignacion) {
+                            this.asignacion.getVariable().setValorDeVariable(String.valueOf(nuevoValor));
+                        }
                         System.out.println("Id:" + this.asignacion.getVariable().getNombreDeVariable() + " Valor:" + this.asignacion.getVariable().getValorDeVariable());
                     } else {
                         System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
+                        this.errorEnAsignacion = true;
                     }
                     break;
                 case "cadena":
                     ManejadorDeExpresionesTipoCadena man2 = new ManejadorDeExpresionesTipoCadena(this.manejadorDeVariables);
                     String nuevoValor1 = man2.recorridoDeOperaciones(this.asignacion.getExpresion());
                     if (!man2.existioErrorAlRealizarLaOperacion()) {
-                        this.asignacion.getVariable().setValorDeVariable(nuevoValor1);
+                        if (seDebeRealizarLaAsignacion) {
+                            this.asignacion.getVariable().setValorDeVariable(nuevoValor1);
+                        }
                         System.out.println("Id:" + this.asignacion.getVariable().getNombreDeVariable() + " Valor:" + this.asignacion.getVariable().getValorDeVariable());
                     } else {
+                        this.errorEnAsignacion = true;
                         System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
                     }
                     break;
@@ -56,13 +66,18 @@ public class ManejadorDeAsignacionDeExpresiones {
                     ManejadorDeExpresionesBooleanas man3 = new ManejadorDeExpresionesBooleanas(this.manejadorDeVariables);
                     boolean nuevoValor2 = man3.recorridoDeExpresion(this.asignacion.getExpresion());
                     if (!man3.existioErrorAlRealizarLaOperacion()) {
-                        if (nuevoValor2) {
-                            this.asignacion.getVariable().setValorDeVariable("true");
-                            System.out.println("Valor TRUE asignado ID:" + this.asignacion.getVariable().getNombreDeVariable());
-                        } else {
-                            this.asignacion.getVariable().setValorDeVariable("false");
-                            System.out.println("Valor FALSE asignado ID:" + this.asignacion.getVariable().getNombreDeVariable());
+                        if (seDebeRealizarLaAsignacion) {
+                            if (nuevoValor2) {
+                                this.asignacion.getVariable().setValorDeVariable("true");
+                                System.out.println("Valor TRUE asignado ID:" + this.asignacion.getVariable().getNombreDeVariable());
+                            } else {
+                                this.asignacion.getVariable().setValorDeVariable("false");
+                                System.out.println("Valor FALSE asignado ID:" + this.asignacion.getVariable().getNombreDeVariable());
+                            }
                         }
+                    } else {
+                        this.errorEnAsignacion = true;
+                        System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
                     }
                     break;
                 default:
@@ -71,6 +86,14 @@ public class ManejadorDeAsignacionDeExpresiones {
             }
         }
 
+    }
+
+    public boolean esErrorEnAsignacion() {
+        return errorEnAsignacion;
+    }
+
+    public void setErrorEnAsignacion(boolean errorEnAsignacion) {
+        this.errorEnAsignacion = errorEnAsignacion;
     }
 
 }

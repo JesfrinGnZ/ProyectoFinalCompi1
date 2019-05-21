@@ -3,10 +3,11 @@
 
 package backend.generacionHtml;
 import java_cup.runtime.*;
-import backend.arbol.*;
+import backend.arbolAST.*;
 import backend.AccionesMatematicas.*;
 
 import backend.asignacionCreacionDeVariables.*;
+import backend.condiciones.*;
 import backend.expresiones.*;
 import backend.expresionesAritmeticas.*;
 import backend.expesionesBooleanas.*;
@@ -19,12 +20,16 @@ parser code {:
 
     private ArrayList<Variable> tablaDeSimbolos;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;//----->Quizas no lo necesitemos
+    ArrayList<Nodo> instruccionesParaIf;
+    ArrayList<Nodo> instruccionesElseParaIf;
 
     // Connect this parser to a scanner!
     public parser(AnalizadorDeCodigoEmbebido lex,ArrayList<Variable> tablaDeSimbolos) {
 	super(lex);
         this.tablaDeSimbolos=tablaDeSimbolos;
         this.manejadorDeVariables = new ManejadorDeTablaDeSimbolos(tablaDeSimbolos);
+        this.instruccionesParaIf=new ArrayList<>();
+        this.instruccionesElseParaIf=new ArrayList<>();
     }
 
     //Metodo al que se llama automaticamente ante algun error sintactico
@@ -88,25 +93,31 @@ terminal String         MAS,MENOS,POR,DIV,MAYOR,MENOR,DOS_PUNTOS,IGUAL,PARENTESI
 
 //--------------------------------------------NO TERMINALES-------------------------------------
 
-//non terminal Object     operacion;//Inicio de gramatica
+/****************************************Condiconal***********************/
 
+non terminal Object             condicional;
+non terminal Object             bloque,bloque2;
+non terminal Object             conjuntoDeInstruccionesComplejas;
+non terminal Nodo               unaInstruccionCompleja;
+non terminal Object             conjuntoDeInstruccionesComplejas2;
+non terminal Nodo               unaInstruccionCompleja2;
 
 /****************************************Asignaciones***********************/
 
 non terminal String declaracionDeVariable,asignacionDeVariable;
 
 
-/****************************************Expresiones Aritmeticas***********************/
-non terminal Expresion     expresion,t,f; //Expresiones matematicas
+/****************************************Expresiones ***********************/
+non terminal Expresion     expresion,t,f; //Expresiones matematicas y cadenas
 
-non terminal Expresion        expresionesBooleanas,exB,exB1;
+non terminal Expresion        expresionesBooleanas,exB,exB1;//Expresiones booleanas
 /****************************************Expresiones Con cadenas***********************/
 
 non terminal ExpresionConCadena     expresionCadena,cadena,tipoDeCadena;
 
 
 
-non terminal Object     conjuntoDeInstrucciones,unaInstruccion;
+non terminal Object             conjuntoDeInstrucciones,unaInstruccion;
 /*--------------- 3ra Area: Reglas Semanticas -----------------------*/
 
 precedence left OR;
@@ -120,6 +131,73 @@ start with conjuntoDeInstrucciones;
 conjuntoDeInstrucciones::= conjuntoDeInstrucciones unaInstruccion | unaInstruccion;
 unaInstruccion::=declaracionDeVariable;
 unaInstruccion::=asignacionDeVariable;
+unaInstruccion::=condicional;
+ //----------------------------------------------------Condicional(IF)-------------------------------
+condicional::=IF:i IDENTIFICADOR:e THEN bloque ELSE bloque2
+              {:
+              Identificador id=new Identificador(eleft,eright,e);
+              Condicion condicion= new Condicion(ileft,iright,id,instruccionesParaIf,instruccionesElseParaIf);
+              ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(condicion,manejadorDeVariables);
+              manejador.realizarOperaciones();
+              instruccionesParaIf=new ArrayList<>();
+              instruccionesElseParaIf=new ArrayList<>();
+              :};
+
+
+condicional::=IF:i expresionesBooleanas:e THEN bloque ELSE bloque2
+                {:
+                Condicion condicion= new Condicion(ileft,iright,e,instruccionesParaIf,instruccionesElseParaIf);
+                ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(condicion,manejadorDeVariables);
+                manejador.realizarOperaciones();
+                instruccionesParaIf=new ArrayList<>();
+                instruccionesElseParaIf=new ArrayList<>();
+                :};
+
+
+
+bloque::= BEGIN CORCHETE_ABIERTO conjuntoDeInstruccionesComplejas CORCHETE_CERRADO END PUNTO_COMA
+          {::};
+
+bloque::=unaInstruccionCompleja;
+
+conjuntoDeInstruccionesComplejas::=conjuntoDeInstruccionesComplejas unaInstruccionCompleja|unaInstruccionCompleja;
+
+unaInstruccionCompleja::= VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
+                          {:instruccionesParaIf.add(new Variable(ileft,iright,i,"entera","0"));:}|
+                          VAR IDENTIFICADOR:i DOS_PUNTOS BOOLEAN:e PUNTO_COMA
+                          {:instruccionesParaIf.add(new Variable(ileft,iright,i,"booleana","true"));:}|
+                          VAR IDENTIFICADOR:i DOS_PUNTOS STRING:e PUNTO_COMA
+                          {:instruccionesParaIf.add(new Variable(ileft,iright,i,"cadena",""));:};
+
+unaInstruccionCompleja::=IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
+                         {:instruccionesParaIf.add(new Asignacion(i, e, manejadorDeVariables));:}|
+                         IDENTIFICADOR:i DOS_PUNTOS IGUAL expresionesBooleanas:e PUNTO_COMA
+                         {:instruccionesParaIf.add(new Asignacion(i, e, manejadorDeVariables));:};
+
+
+
+
+bloque2::= BEGIN CORCHETE_ABIERTO conjuntoDeInstruccionesComplejas2 CORCHETE_CERRADO END PUNTO_COMA
+          {::};
+
+bloque2::=unaInstruccionCompleja2;
+
+conjuntoDeInstruccionesComplejas2::=conjuntoDeInstruccionesComplejas2 unaInstruccionCompleja2|unaInstruccionCompleja2;
+
+unaInstruccionCompleja2::= VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
+                          {:instruccionesElseParaIf.add(new Variable(ileft,iright,i,"entera","0"));:}|
+                          VAR IDENTIFICADOR:i DOS_PUNTOS BOOLEAN:e PUNTO_COMA
+                          {:instruccionesElseParaIf.add(new Variable(ileft,iright,i,"booleana","true"));:}|
+                          VAR IDENTIFICADOR:i DOS_PUNTOS STRING:e PUNTO_COMA
+                          {:instruccionesElseParaIf.add(new Variable(ileft,iright,i,"cadena",""));:};
+
+unaInstruccionCompleja2::=IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
+                         {:instruccionesElseParaIf.add(new Asignacion(i, e, manejadorDeVariables));:}|
+                         IDENTIFICADOR:i DOS_PUNTOS IGUAL expresionesBooleanas:e PUNTO_COMA
+                         {:instruccionesElseParaIf.add(new Asignacion(i, e, manejadorDeVariables));:};
+
+
+
 
  //----------------------------------------------------Declaracion de variables-------------------------------
 
@@ -139,12 +217,12 @@ declaracionDeVariable::=VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
 
 asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
                         {:Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
-                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion);
+                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion,true);
                         nuevaAsignacion.asignacionDeVariable();:}|
                         IDENTIFICADOR:i DOS_PUNTOS IGUAL expresionesBooleanas:e PUNTO_COMA
                         {:System.out.println("Asignacion a booleana");
                         Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
-                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion);
+                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion,true);
                         nuevaAsignacion.asignacionDeVariable();:};    
                         
 
