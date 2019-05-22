@@ -8,47 +8,137 @@ package backend.generacionHtml;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int NUMERO = 2;
-  public static final int POR = 25;
-  public static final int CORCHETE_CERRADO = 36;
-  public static final int ORACION = 19;
-  public static final int INTEGER = 5;
-  public static final int DOS_PUNTOS = 29;
-  public static final int PORCENTAJE = 37;
-  public static final int PARENTESIS_ABIERTO = 31;
-  public static final int FOR = 16;
-  public static final int IDENTIFICADOR = 4;
-  public static final int AND = 10;
-  public static final int IGUAL = 30;
-  public static final int OR = 11;
-  public static final int DIV = 26;
-  public static final int BEGIN = 21;
-  public static final int IF = 12;
-  public static final int PUNTO_COMA = 34;
-  public static final int CORCHETE_ABIERTO = 35;
+  public static final int CORCHETE_CERRADO = 81;
+  public static final int IDENTIFICADOR = 49;
+  public static final int GT = 37;
+  public static final int AMP = 38;
+  public static final int AACUTE = 39;
+  public static final int TYPE = 32;
+  public static final int UACUTE = 43;
+  public static final int E_A = 23;
+  public static final int BGCOLOR = 25;
+  public static final int E_LI = 17;
+  public static final int OACUTE = 42;
+  public static final int CORCHETE_ABIERTO = 80;
+  public static final int MAYOR = 72;
+  public static final int NAME = 35;
+  public static final int E_FONT = 15;
+  public static final int IACUTE = 41;
+  public static final int LT = 36;
+  public static final int POR = 70;
+  public static final int INTEGER = 50;
+  public static final int NUMERO = 47;
+  public static final int E_HTML = 2;
+  public static final int FALSE = 54;
+  public static final int E_TITLE = 4;
+  public static final int TEXT = 26;
+  public static final int VAR = 48;
+  public static final int THEN = 58;
+  public static final int DOS_PUNTOS = 74;
+  public static final int E_NOBR = 20;
+  public static final int WIDTH = 34;
+  public static final int PUNTO_COMA = 79;
+  public static final int ORACION_TIPO_ATRIBUTO = 46;
+  public static final int NTILDE = 45;
+  public static final int COMA = 78;
+  public static final int E_CENTER = 6;
+  public static final int TRUE = 53;
+  public static final int IGUAL = 75;
+  public static final int E_PARRAFO = 7;
+  public static final int WHILE = 60;
+  public static final int PORCENTAJE = 82;
+  public static final int ALIGN = 28;
+  public static final int BOOLEAN = 51;
+  public static final int FOR = 61;
+  public static final int FACE = 30;
+  public static final int DIV = 71;
+  public static final int ELSE = 59;
+  public static final int MENOS = 69;
+  public static final int MENOR = 73;
+  public static final int MAS = 68;
+  public static final int E_NEGRILLA = 8;
+  public static final int E_OL = 18;
+  public static final int URL = 65;
+  public static final int E_SUBRAYADO = 9;
+  public static final int E_UL = 16;
+  public static final int LINK = 27;
   public static final int EOF = 0;
-  public static final int BOOLEAN = 6;
-  public static final int TRUE = 8;
+  public static final int E_BLOCKQUOTE = 22;
+  public static final int E_SUP = 14;
+  public static final int PRINT = 63;
+  public static final int NTILDEM = 44;
+  public static final int E_BODY = 5;
+  public static final int E_HREF = 24;
+  public static final int EACUTE = 40;
+  public static final int E_BR = 19;
+  public static final int E_STRIKE = 11;
+  public static final int E_HR = 21;
+  public static final int ORACION = 64;
+  public static final int E_SUB = 13;
+  public static final int E_HEAD = 3;
+  public static final int OR = 56;
+  public static final int E_BLINK = 12;
   public static final int error = 1;
-  public static final int COMA = 33;
-  public static final int MENOS = 24;
-  public static final int MENOR = 28;
-  public static final int URL = 20;
-  public static final int MAYOR = 27;
-  public static final int ELSE = 14;
-  public static final int TO = 17;
-  public static final int WHILE = 15;
-  public static final int THEN = 13;
-  public static final int END = 22;
-  public static final int STRING = 7;
-  public static final int PARENTESIS_CERRADO = 32;
-  public static final int FALSE = 9;
-  public static final int VAR = 3;
-  public static final int PRINT = 18;
-  public static final int MAS = 23;
+  public static final int START = 33;
+  public static final int IF = 57;
+  public static final int PARENTESIS_CERRADO = 77;
+  public static final int COLOR = 31;
+  public static final int END = 67;
+  public static final int BEGIN = 66;
+  public static final int STRING = 52;
+  public static final int SIZE = 29;
+  public static final int PARENTESIS_ABIERTO = 76;
+  public static final int AND = 55;
+  public static final int TO = 62;
+  public static final int E_ITALICA = 10;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
+  "E_HTML",
+  "E_HEAD",
+  "E_TITLE",
+  "E_BODY",
+  "E_CENTER",
+  "E_PARRAFO",
+  "E_NEGRILLA",
+  "E_SUBRAYADO",
+  "E_ITALICA",
+  "E_STRIKE",
+  "E_BLINK",
+  "E_SUB",
+  "E_SUP",
+  "E_FONT",
+  "E_UL",
+  "E_LI",
+  "E_OL",
+  "E_BR",
+  "E_NOBR",
+  "E_HR",
+  "E_BLOCKQUOTE",
+  "E_A",
+  "E_HREF",
+  "BGCOLOR",
+  "TEXT",
+  "LINK",
+  "ALIGN",
+  "SIZE",
+  "FACE",
+  "COLOR",
+  "TYPE",
+  "START",
+  "WIDTH",
+  "NAME",
+  "LT",
+  "GT",
+  "AMP",
+  "AACUTE",
+  "EACUTE",
+  "IACUTE",
+  "OACUTE",
+  "UACUTE",
+  "NTILDEM",
+  "NTILDE",
+  "ORACION_TIPO_ATRIBUTO",
   "NUMERO",
   "VAR",
   "IDENTIFICADOR",

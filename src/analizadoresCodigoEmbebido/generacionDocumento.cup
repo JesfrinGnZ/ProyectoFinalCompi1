@@ -7,6 +7,7 @@ import backend.arbolAST.*;
 import backend.AccionesMatematicas.*;
 
 import backend.asignacionCreacionDeVariables.*;
+import backend.Escritura.*;
 import backend.condiciones.*;
 import backend.expresiones.*;
 import backend.expresionesAritmeticas.*;
@@ -22,6 +23,7 @@ parser code {:
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;//----->Quizas no lo necesitemos
     ArrayList<Nodo> instruccionesParaIf;
     ArrayList<Nodo> instruccionesElseParaIf;
+    ArrayList<Nodo> instruccionesPrint;
 
     // Connect this parser to a scanner!
     public parser(AnalizadorDeCodigoEmbebido lex,ArrayList<Variable> tablaDeSimbolos) {
@@ -30,6 +32,7 @@ parser code {:
         this.manejadorDeVariables = new ManejadorDeTablaDeSimbolos(tablaDeSimbolos);
         this.instruccionesParaIf=new ArrayList<>();
         this.instruccionesElseParaIf=new ArrayList<>();
+        this.instruccionesPrint=new ArrayList<>();
     }
 
     //Metodo al que se llama automaticamente ante algun error sintactico
@@ -48,10 +51,61 @@ parser code {:
 /*--------------- 2da Area: Declaraciones -----------------------*/
 
 //---------------------------------------------TERMINALES-----------------------------------
+/****************************************HTML Y OTROS*************************/
+
+terminal String E_HTML,
+E_HEAD,
+E_TITLE,
+E_BODY,
+E_CENTER,
+E_PARRAFO,
+E_NEGRILLA,
+E_SUBRAYADO,
+E_ITALICA,
+E_STRIKE,
+E_BLINK,
+E_SUB,
+E_SUP,
+E_FONT,
+E_UL,
+E_LI,
+E_OL,
+E_BR,
+E_NOBR,
+E_HR,
+E_BLOCKQUOTE,
+E_A,
+E_HREF;
+
+terminal String BGCOLOR,
+TEXT,
+LINK,
+ALIGN,
+SIZE,
+FACE,
+COLOR,
+TYPE,
+START,
+WIDTH,
+NAME;
+
+terminal String LT,
+GT,
+AMP,
+AACUTE,
+EACUTE,
+IACUTE,
+OACUTE,
+UACUTE,
+NTILDEM,
+NTILDE;
+
+terminal String ORACION_TIPO_ATRIBUTO;
 
 /****************************************Expresiones*************************/
 
 terminal String NUMERO;
+
 
 /****************************************Definición de variables*************************/
 
@@ -106,6 +160,8 @@ non terminal Nodo               unaInstruccionCompleja2;
 
 non terminal String declaracionDeVariable,asignacionDeVariable;
 
+/****************************************Escritura*************************/
+non terminal String  escritura,conjuntoDeTexto,unTexto,ultimaInstruccion;
 
 /****************************************Expresiones ***********************/
 non terminal Expresion     expresion,t,f; //Expresiones matematicas y cadenas
@@ -132,6 +188,8 @@ conjuntoDeInstrucciones::= conjuntoDeInstrucciones unaInstruccion | unaInstrucci
 unaInstruccion::=declaracionDeVariable;
 unaInstruccion::=asignacionDeVariable;
 unaInstruccion::=condicional;
+unaInstruccion::=escritura;
+
  //----------------------------------------------------Condicional(IF)-------------------------------
 condicional::=IF:i IDENTIFICADOR:e THEN bloque ELSE bloque2
               {:
@@ -175,7 +233,8 @@ unaInstruccionCompleja::=IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
                          {:instruccionesParaIf.add(new Asignacion(i, e, manejadorDeVariables));:};
 
 
-
+unaInstruccionCompleaj::=IF:i IDENTIFICADOR:e THEN bloque ELSE bloque2
+                        {::};
 
 bloque2::= BEGIN CORCHETE_ABIERTO conjuntoDeInstruccionesComplejas2 CORCHETE_CERRADO END PUNTO_COMA
           {::};
@@ -197,6 +256,28 @@ unaInstruccionCompleja2::=IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COM
                          {:instruccionesElseParaIf.add(new Asignacion(i, e, manejadorDeVariables));:};
 
 
+ //----------------------------------------------------Escritura-------------------------------
+escritura::=PRINT:i PARENTESIS_ABIERTO conjuntoDeTexto ultimaInstruccion PARENTESIS_CERRADO PUNTO_COMA
+           {:Escritura escritura=new Escritura(ileft,iright,instruccionesPrint);
+             ManejadorDeEscritura  man =new ManejadorDeEscritura(escritura,manejadorDeVariables);
+             man.manejarEscritura();
+             instruccionesPrint=new ArrayList<>();
+            :};
+
+escritura::=PRINT:i PARENTESIS_ABIERTO ultimaInstruccion PARENTESIS_CERRADO PUNTO_COMA{:System.out.println("PRINT RECONOCIDO");
+ Escritura escritura=new Escritura(ileft,iright,instruccionesPrint);
+             ManejadorDeEscritura  man =new ManejadorDeEscritura(escritura,manejadorDeVariables);
+             man.manejarEscritura();
+             instruccionesPrint=new ArrayList<>();
+             //Systme.out.println("Tamano de lista:"+instruccionesPrint.size());
+            :};
+
+conjuntoDeTexto::=conjuntoDeTexto unTexto|unTexto;
+
+unTexto::=ORACION:i COMA{:instruccionesPrint.add(new Oracion(ileft,iright,i));:};
+unTexto::=IDENTIFICADOR:i COMA{:instruccionesPrint.add(new Identificador(ileft, iright,i));:};
+ultimaInstruccion::=ORACION:i{:instruccionesPrint.add(new Oracion(ileft,iright,i));:};
+ultimaInstruccion::=IDENTIFICADOR:i{:instruccionesPrint.add(new Identificador(ileft, iright,i));:};
 
 
  //----------------------------------------------------Declaracion de variables-------------------------------
@@ -213,7 +294,8 @@ declaracionDeVariable::=VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
                         {:Variable variable = new Variable(ileft,iright,i,"cadena","");
                         ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
                         man.crearVariable();:};
- //----------------------------------------------------Asignacion de variables-------------------------------
+
+//----------------------------------------------------Asignacion de variables-------------------------------
 
 asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
                         {:Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
@@ -330,3 +412,4 @@ f::=TRUE:i
 
 f::=FALSE:i
     {:RESULT= new ValorDeVerdad(ileft,iright,"false");:};
+

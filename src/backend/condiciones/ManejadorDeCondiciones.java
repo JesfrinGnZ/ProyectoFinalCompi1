@@ -5,6 +5,8 @@
  */
 package backend.condiciones;
 
+import backend.Escritura.Escritura;
+import backend.Escritura.ManejadorDeEscritura;
 import backend.arbolAST.Nodo;
 import backend.asignacionCreacionDeVariables.Asignacion;
 import backend.asignacionCreacionDeVariables.ManejadorDeAsignacionDeExpresiones;
@@ -50,6 +52,10 @@ public class ManejadorDeCondiciones {
                 Asignacion asignacion = ((Asignacion) instruccion);
                 ManejadorDeAsignacionDeExpresiones manDeAsignaciones = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion, true);
                 manDeAsignaciones.asignacionDeVariable();
+            }else if(instruccion instanceof Escritura){
+                Escritura escritura =((Escritura)instruccion);
+                ManejadorDeEscritura manDeEscritura = new ManejadorDeEscritura(escritura, manejadorDeVariables);
+                manDeEscritura.manejarEscritura();
             }
         }
     }

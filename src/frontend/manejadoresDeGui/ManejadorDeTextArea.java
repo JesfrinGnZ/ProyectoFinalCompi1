@@ -85,6 +85,9 @@ public class ManejadorDeTextArea {
                 case "aqua":
                     this.areaDeTexto.setBackground(Color.decode("#00ffff"));
                     break;
+                default:
+                    this.areaDeTexto.setBackground(Color.white);
+                    break;
             }
         }
 
@@ -107,10 +110,9 @@ public class ManejadorDeTextArea {
     }
 
 //------------------------------------------Aplicacion de estilos------------------------------------------------    
-    
-    public void pruebaDeEstilos() throws BadLocationException{
-        String cadena1="cadena1\n";
-        String cadena2="cadena2\n";
+    public void pruebaDeEstilos() throws BadLocationException {
+        String cadena1 = "cadena1\n";
+        String cadena2 = "cadena2\n";
         SimpleAttributeSet atributos = new SimpleAttributeSet();
         StyleConstants.setBold(atributos, true);
         StyleConstants.setForeground(atributos, Color.BLUE);
@@ -118,8 +120,8 @@ public class ManejadorDeTextArea {
         //Insertar texto
         this.areaDeTexto.getStyledDocument().insertString(0, cadena1, atributos);
         //Se agrega la alineacion
-        this.areaDeTexto.getStyledDocument().setParagraphAttributes(0,this.areaDeTexto.getStyledDocument().getLength(), atributos, false);
-        
+        this.areaDeTexto.getStyledDocument().setParagraphAttributes(0, this.areaDeTexto.getStyledDocument().getLength(), atributos, false);
+
         //Vuelta a valores por defecto
         //Contenedor de atributos
         SimpleAttributeSet atributo2 = new SimpleAttributeSet();
@@ -131,12 +133,11 @@ public class ManejadorDeTextArea {
         StyleConstants.setFontSize(atributo2, 30);
         StyleConstants.setFontFamily(atributo2, "Nakula");
 //Se agreaga la alineacion desde la posicion anterior hasta el nuevo tamano
-        this.areaDeTexto.getStyledDocument().setParagraphAttributes(cadena1.length(),this.areaDeTexto.getStyledDocument().getLength(), atributo2, true);
-        
+        this.areaDeTexto.getStyledDocument().setParagraphAttributes(cadena1.length(), this.areaDeTexto.getStyledDocument().getLength(), atributo2, true);
+
 //atributos.removeAttribute(atributos.getAttribute("Bold"));
     }
-    
-    
+
     public void aplicarEstilo(String tipoDeEstilo) {
 
         switch (tipoDeEstilo) {
@@ -164,10 +165,10 @@ public class ManejadorDeTextArea {
                  {
                     try {
                         //http://www.chuidiang.org/java/ejemplos/JEditorPane-JTextPane/JEditorPane-JTextPane.php
-                        String miTexto ="Este es un texto de n letras";
+                        String miTexto = "Este es un texto de n letras";
                         this.areaDeTexto.getStyledDocument().insertString(0, "Este es un texto de unas cuantas letras ", at);
                         StyledDocument doc = this.areaDeTexto.getStyledDocument();
-                        StyledDocument doc2=doc;
+                        StyledDocument doc2 = doc;
                         StyleConstants.setAlignment(at, StyleConstants.ALIGN_RIGHT);
                         doc.setParagraphAttributes(0, 0, at, true);
                         doc.setParagraphAttributes(0, 0, at, true);
