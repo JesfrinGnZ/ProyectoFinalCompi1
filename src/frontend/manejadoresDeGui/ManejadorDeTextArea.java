@@ -5,9 +5,13 @@
  */
 package frontend.manejadoresDeGui;
 
+import backend.Etiquetas.AtributoDeEtiqueta;
+import backend.Etiquetas.Etiqueta;
+import frontend.ManejadoresDeEtiquetas.ManejadorDeParrafo;
 import java.awt.Color;
 import java.awt.Font;
 import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTextArea;
@@ -26,69 +30,113 @@ import javax.swing.text.StyledDocument;
 public class ManejadorDeTextArea {
 
     private final JTextPane areaDeTexto;
-    private Color colorDeLinks;
+    private boolean errorEnAccion;
+    private Color linkColor;
+    private Color bgColor;
+    private Color textColor;
+    private ArrayList<Etiqueta> etiquetas;
 
     public ManejadorDeTextArea(JTextPane areaDeTexto) {
         this.areaDeTexto = areaDeTexto;
+        this.linkColor = Color.RED;
+        this.bgColor = Color.WHITE;
+        this.textColor = Color.BLACK;
+        this.errorEnAccion = false;
+        this.etiquetas = new ArrayList<>();
+    }
+
+    public ArrayList<Etiqueta> getEtiquetas() {
+        return etiquetas;
+    }
+
+    public void setEtiquetas(ArrayList<Etiqueta> etiquetas) {
+        this.etiquetas = etiquetas;
+    }
+
+    public void manejarEtiqueta() {
+        int n = this.areaDeTexto.getStyledDocument().getLength();
+        SimpleAttributeSet atributos;
+        for (Etiqueta etiqueta : etiquetas) {
+            switch (etiqueta.getTipoDeEtiqueta()) {
+                case "title":
+                    System.out.println("Est titulo:" + etiqueta.getAtributos().size() + " Texto:" + etiqueta.getTexto());
+                    break;
+                case "p":
+                    System.out.println("Es parrafo:" + etiqueta.getAtributos().size() + " Texto:" + etiqueta.getTexto());
+                    ManejadorDeParrafo manP=new ManejadorDeParrafo(etiqueta, this);
+                    atributos=manP.buscarAlineacion();
+                    break;
+            }
+        }
+    }
+
+    public void anadirTexto() {
+
+    }
+//------------------------------------------Cambio de color para el fondo-------------------------------------
+
+    public void atributosDeBody(ArrayList<AtributoDeEtiqueta> atributos) {
+        for (AtributoDeEtiqueta atributo : atributos) {
+            String tipo = atributo.getTipo().toLowerCase();
+            switch (tipo) {
+                case "bgcolor":
+                    this.bgColor = asignarColor(atributo.getValor(), Color.WHITE);
+                    break;
+                case "text":
+                    this.textColor = asignarColor(atributo.getValor(), Color.BLACK);
+                    break;
+                case "link":
+                    this.linkColor = asignarColor(atributo.getValor(), Color.RED);
+                    break;
+                default:
+                    System.out.println("ERROR ATRIBUTO NO VALIDO");
+                    this.errorEnAccion = true;
+                    break;
+            }
+        }
     }
 
 //------------------------------------------Cambio de color para el fondo-------------------------------------
-    public void setBgColor(String color, boolean esHexadecimal) {
-        if (esHexadecimal) {
-            Color nuevoColor = Color.decode(color);
-            this.areaDeTexto.setBackground(nuevoColor);
-        } else {
-            color = color.toLowerCase();
-            switch (color) {
-                case "black":
-                    this.areaDeTexto.setBackground(Color.black);
-                    break;
-                case "olive":
-                    this.areaDeTexto.setBackground(Color.decode("#808000"));
-                    break;
-                case "teal":
-                    this.areaDeTexto.setBackground(Color.decode("#008080"));
-                    break;
-                case "red":
-                    this.areaDeTexto.setBackground(Color.red);
-                    break;
-                case "blue":
-                    this.areaDeTexto.setBackground(Color.blue);
-                    break;
-                case "maroon":
-                    this.areaDeTexto.setBackground(Color.decode("#800000"));
-                    break;
-                case "navy":
-                    this.areaDeTexto.setBackground(Color.decode("#000080"));
-                    break;
-                case "gray":
-                    this.areaDeTexto.setBackground(Color.gray);
-                    break;
-                case "lime":
-                    this.areaDeTexto.setBackground(Color.decode("#00ff00"));
-                    break;
-                case "fuchsia":
-                    this.areaDeTexto.setBackground(Color.decode("#ca2c92"));
-                    break;
-                case "green":
-                    this.areaDeTexto.setBackground(Color.green);
-                    break;
-                case "purple":
-                    this.areaDeTexto.setBackground(Color.decode("#800080"));
-                    break;
-                case "silver":
-                    this.areaDeTexto.setBackground(Color.decode("#c0c0c0"));
-                    break;
-                case "yellow":
-                    this.areaDeTexto.setBackground(Color.yellow);
-                    break;
-                case "aqua":
-                    this.areaDeTexto.setBackground(Color.decode("#00ffff"));
-                    break;
-                default:
-                    this.areaDeTexto.setBackground(Color.white);
-                    break;
-            }
+    public Color asignarColor(String color, Color colorPorDefecto) {
+        color = color.toLowerCase();
+        switch (color) {
+            case "black":
+                return Color.black;
+            case "olive":
+                return Color.decode("#808000");
+            case "teal":
+                return Color.decode("#008080");
+            case "red":
+                return Color.red;
+            case "blue":
+                return Color.blue;
+            case "maroon":
+                return Color.decode("#800000");
+            case "navy":
+                return Color.decode("#000080");
+            case "gray":
+                return Color.gray;
+            case "lime":
+                return Color.decode("#00ff00");
+            case "fuchsia":
+                return Color.decode("#ca2c92");
+            case "green":
+                return Color.green;
+            case "purple":
+                return Color.decode("#800080");
+            case "silver":
+                return Color.decode("#c0c0c0");
+            case "yellow":
+                return Color.yellow;
+            case "aqua":
+                return Color.decode("#00ffff");
+            default:
+                try {
+                    Color nuevoColor = Color.decode(color);
+                    return nuevoColor;
+                } catch (Exception e) {
+                    return colorPorDefecto;
+                }
         }
 
     }
@@ -100,7 +148,7 @@ public class ManejadorDeTextArea {
 
 //--------------------------------------------Cambio de color para los links-------------------------------------
     public void setLinkColor(Color color) {
-        this.colorDeLinks = color;
+        this.linkColor = color;
     }
 
 //--------------------------------------------Alineacion de texto-----------------------------------------------------
@@ -126,14 +174,15 @@ public class ManejadorDeTextArea {
         //Contenedor de atributos
         SimpleAttributeSet atributo2 = new SimpleAttributeSet();
         //Se inserta texto desde la posicion anterior
-        this.areaDeTexto.getStyledDocument().insertString(cadena1.length(), cadena2, atributo2);
+        int n = this.areaDeTexto.getStyledDocument().getLength();
+        this.areaDeTexto.getStyledDocument().insertString(n, cadena2, atributo2);
         StyleConstants.setAlignment(atributo2, StyleConstants.ALIGN_RIGHT);
         //StyleConstants.setItalic(atributo2, true);
         //StyleConstants.setBold(atributo2, true);
         StyleConstants.setFontSize(atributo2, 30);
         StyleConstants.setFontFamily(atributo2, "Nakula");
 //Se agreaga la alineacion desde la posicion anterior hasta el nuevo tamano
-        this.areaDeTexto.getStyledDocument().setParagraphAttributes(cadena1.length(), this.areaDeTexto.getStyledDocument().getLength(), atributo2, true);
+        this.areaDeTexto.getStyledDocument().setParagraphAttributes(n, this.areaDeTexto.getStyledDocument().getLength(), atributo2, true);
 
 //atributos.removeAttribute(atributos.getAttribute("Bold"));
     }

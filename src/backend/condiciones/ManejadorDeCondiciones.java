@@ -5,12 +5,16 @@
  */
 package backend.condiciones;
 
+import backend.ciclos.CicloFor;
+import backend.ciclos.ManejadorDeCicloFor;
 import backend.Escritura.Escritura;
 import backend.Escritura.ManejadorDeEscritura;
 import backend.arbolAST.Nodo;
 import backend.asignacionCreacionDeVariables.Asignacion;
 import backend.asignacionCreacionDeVariables.ManejadorDeAsignacionDeExpresiones;
 import backend.asignacionCreacionDeVariables.ManejadorDeCreacionDeVariables;
+import backend.ciclos.CicloWhile;
+import backend.ciclos.ManejadorDeCicloWhile;
 import backend.expesionesBooleanas.ManejadorDeExpresionesBooleanas;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
@@ -36,26 +40,39 @@ public class ManejadorDeCondiciones {
         if (!man.existioErrorAlRealizarLaOperacion()) {
             if (valorDeExpresion) {
                 recorrerLista(this.condicion.getInstruccionesAceptacion());
-            }else{
+            } else {
                 recorrerLista(this.condicion.getInstruccionesRechazo());
             }
         }
     }
 
     public void recorrerLista(ArrayList<Nodo> lista) {
-        for (Nodo instruccion :lista) {
+        for (Nodo instruccion : lista) {
             if (instruccion instanceof Variable) {//Variable--->Es como un nodo declaracion
                 Variable variable = ((Variable) instruccion);
                 ManejadorDeCreacionDeVariables manDeVariables = new ManejadorDeCreacionDeVariables(manejadorDeVariables, variable);
                 manDeVariables.crearVariable();
             } else if (instruccion instanceof Asignacion) {
                 Asignacion asignacion = ((Asignacion) instruccion);
+                asignacion.setVariable(manejadorDeVariables.verificarSiExisteVariable(asignacion.getIdDeVariable()));
                 ManejadorDeAsignacionDeExpresiones manDeAsignaciones = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion, true);
                 manDeAsignaciones.asignacionDeVariable();
-            }else if(instruccion instanceof Escritura){
-                Escritura escritura =((Escritura)instruccion);
+            } else if (instruccion instanceof Escritura) {
+                Escritura escritura = ((Escritura) instruccion);
                 ManejadorDeEscritura manDeEscritura = new ManejadorDeEscritura(escritura, manejadorDeVariables);
                 manDeEscritura.manejarEscritura();
+            } else if (instruccion instanceof Condicion) {
+                Condicion nuevaCondicion = ((Condicion) instruccion);
+                ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(nuevaCondicion, manejadorDeVariables);
+                manejador.realizarOperaciones();
+            } else if (instruccion instanceof CicloFor) {
+                CicloFor cicloF = ((CicloFor) instruccion);
+                ManejadorDeCicloFor manejadorF = new ManejadorDeCicloFor(cicloF, manejadorDeVariables);
+                manejadorF.realizarOperaciones();
+            } else if (instruccion instanceof CicloWhile) {
+                CicloWhile ciclo = ((CicloWhile) instruccion);
+                ManejadorDeCicloWhile manW = new ManejadorDeCicloWhile(ciclo, manejadorDeVariables);
+                manW.realizarOperaciones();
             }
         }
     }

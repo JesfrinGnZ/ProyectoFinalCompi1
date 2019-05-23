@@ -56,10 +56,14 @@
               <EmptySpace max="-2" attributes="0"/>
           </Group>
           <Group type="102" alignment="1" attributes="0">
-              <EmptySpace pref="1069" max="32767" attributes="0"/>
+              <EmptySpace pref="874" max="32767" attributes="0"/>
               <Component id="nuevaPestanaButton" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="cerrarPestanaButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="guardarButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="GuardarComoButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="analizarTodosButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
@@ -71,9 +75,11 @@
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="analizarTodosButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="GuardarComoButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="guardarButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cerrarPestanaButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="nuevaPestanaButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="analizarTodosButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
               <Component id="contenedorTabbedPane1" min="-2" pref="631" max="-2" attributes="0"/>
@@ -107,6 +113,22 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Analizar todos"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="GuardarComoButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="GuardarComo"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="GuardarComoButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="guardarButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Guardar"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="guardarButtonActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

@@ -19,12 +19,13 @@ public class Asignacion extends Nodo{
     private Variable variable;
     private Expresion expresion;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;
+    private String idDeVariable;
 
     public Asignacion(String id, Expresion expresion,ManejadorDeTablaDeSimbolos manejadorDeVariables) {
         this.manejadorDeVariables=manejadorDeVariables;
         this.variable = manejadorDeVariables.verificarSiExisteVariable(id);
         this.expresion = expresion;
-        
+        this.idDeVariable=id;
     }
 
     public Variable getVariable() {
@@ -57,6 +58,22 @@ public class Asignacion extends Nodo{
 
     public void setNumeroDeColumna(int numeroDeColumna) {
         this.numeroDeColumna = numeroDeColumna;
+    }
+
+    public ManejadorDeTablaDeSimbolos getManejadorDeVariables() {
+        return manejadorDeVariables;
+    }
+
+    public void setManejadorDeVariables(ManejadorDeTablaDeSimbolos manejadorDeVariables) {
+        this.manejadorDeVariables = manejadorDeVariables;
+    }
+
+    public String getIdDeVariable() {
+        return idDeVariable;
+    }
+
+    public void setIdDeVariable(String idDeVariable) {
+        this.idDeVariable = idDeVariable;
     }
     
     

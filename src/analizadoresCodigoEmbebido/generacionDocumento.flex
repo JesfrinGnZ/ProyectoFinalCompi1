@@ -195,8 +195,6 @@ Digitos= 0|[1-9][:digit:]*
 
  "["https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*"]" {return symbol(URL,yytext());}
 
- 
-
 {Espacio} 	{/*IGNORAMOS*/}
 }
 
