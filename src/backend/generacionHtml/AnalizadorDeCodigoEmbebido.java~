@@ -1289,7 +1289,7 @@ public class AnalizadorDeCodigoEmbebido implements java_cup.runtime.Scanner {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1: 
             { ErrorLexico nuevoError = new ErrorLexico(yyline,yycolumn,"Token no valido:"+yytext());
-              erroresEnAnalisis.add(nuevoError);
+          erroresEnAnalisis.add(nuevoError);
             } 
             // fall through
           case 84: break;

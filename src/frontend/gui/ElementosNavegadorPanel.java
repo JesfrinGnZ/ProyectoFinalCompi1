@@ -6,12 +6,16 @@
 package frontend.gui;
 
 import backend.errores.ErrorAnalisis;
+import backend.errores.ManejadorDeErrores;
 import backend.generacionHtml.AnalizadorDeCodigoEmbebido;
 import backend.generacionHtml.parser;
 import backend.tablaDeSimbolos.Variable;
 import frontend.manejadoresDeGui.ManejadorDeTextArea;
+import java.awt.Frame;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -30,16 +34,23 @@ public class ElementosNavegadorPanel extends javax.swing.JPanel {
     private boolean seGuardo;
     private ArrayList<Variable> tablaDeVariables;
     private File ruta;
-    
+    private String nombrePestana;
+    private String textoGenerado;
+    private int tipoDeError;
+    private NavegadorFrame padre;
+
     /**
      * Creates new form ElementosNavegadorPanel
+     *
      * @param ruta
      */
-    public ElementosNavegadorPanel(File ruta) {
+    public ElementosNavegadorPanel(File ruta, String nombreDePestana, NavegadorFrame padre) {
         initComponents();
-       this.seGuardo = false;
-       this.ruta=ruta;
-       this.erroresEnAnalisis=new ArrayList<>();
+        this.seGuardo = false;
+        this.ruta = ruta;
+        this.erroresEnAnalisis = new ArrayList<>();
+        this.nombrePestana = nombreDePestana;
+        this.padre = padre;
 //        this.tablaDeVariables = new ArrayList<>();
 //        this.instruccionesTextArea.setAlignmentX(0.5f);
 //        this.instruccionesTextArea.append("HOLA MUNDO");
@@ -222,19 +233,40 @@ public class ElementosNavegadorPanel extends javax.swing.JPanel {
 
     public void analizarTexto(String texto) {
         AnalizadorDeCodigoEmbebido lex = new AnalizadorDeCodigoEmbebido(new BufferedReader(new StringReader(texto)));
-        tablaDeVariables=new ArrayList<>();
-        this.erroresEnAnalisis=new ArrayList<>();
+        tablaDeVariables = new ArrayList<>();
+        this.erroresEnAnalisis = new ArrayList<>();
         lex.iniciarListaDeErrores(erroresEnAnalisis);
-        parser sintactico = new parser(lex, tablaDeVariables,new ManejadorDeTextArea(this.resultadosTextPane),this.erroresEnAnalisis);//Recibe el manejador del 
+        parser sintactico = new parser(lex, tablaDeVariables, new ManejadorDeTextArea(this.resultadosTextPane), this.erroresEnAnalisis);//Recibe el manejador del 
         try {
             sintactico.parse();
         } catch (Exception ex) {
             Logger.getLogger(ElementosNavegadorPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if(this.erroresEnAnalisis.isEmpty()){
-            System.out.println("ES VACIA NO GUARDO NADA");
-        }else{
+
+        ManejadorDirecciones man = new ManejadorDirecciones();
+        File rutaSalida = man.getDefaultDirectory();
+        File direccionCarpeta = new File(rutaSalida + "/ArchivosGenerados");
+        direccionCarpeta.mkdirs();
+        if (this.erroresEnAnalisis.isEmpty()) {
+            System.out.println("ES VACIA NO GUARDO ERRORES NADA");
+            escribirArchivo(new File(rutaSalida + "/ArchivosGenerados/" + nombrePestana + ".html"), sintactico.getTexto());
+        } else {
             System.out.println("GUARDO ERRORES SI!!!!!");
+            ManejadorDeErrores manE = new ManejadorDeErrores(erroresEnAnalisis, nombrePestana,direccionCarpeta);
+            ErroresJDialog err = new ErroresJDialog(padre, true, this,manE);
+            err.setVisible(true);
+            // JOptionPane.showMessageDialog(this, "");
+        }
+    }
+
+    public void escribirArchivo(File direccion, String texto) {
+        try {
+            BufferedWriter bf = new BufferedWriter(new FileWriter(direccion, false));
+            bf.append(texto);
+            bf.close();
+            JOptionPane.showMessageDialog(this, "Se genero el archivo html en la ruta:" + direccion);
+        } catch (Exception ex) {
+            //Logger.getLogger(LectorDeDatos.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -261,6 +293,13 @@ public class ElementosNavegadorPanel extends javax.swing.JPanel {
     public void setRuta(File ruta) {
         this.ruta = ruta;
     }
-    
-    
+
+    public int getTipoDeError() {
+        return tipoDeError;
+    }
+
+    public void setTipoDeError(int tipoDeError) {
+        this.tipoDeError = tipoDeError;
+    }
+
 }

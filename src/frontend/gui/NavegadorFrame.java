@@ -32,7 +32,7 @@ public class NavegadorFrame extends javax.swing.JFrame {
     public NavegadorFrame() {
         initComponents();
         this.numeroDePestana = 1;
-        contenedorTabbedPane1.add("Pestana" + numeroDePestana, new ElementosNavegadorPanel(null));
+        contenedorTabbedPane1.add("Pestana" + numeroDePestana, new ElementosNavegadorPanel(null,"Pestana1",this));
     }
 
     /**
@@ -199,7 +199,7 @@ public class NavegadorFrame extends javax.swing.JFrame {
 
     private ElementosNavegadorPanel nuevaPestana(File ruta) {
         numeroDePestana++;
-        ElementosNavegadorPanel elemento = new ElementosNavegadorPanel(ruta);
+        ElementosNavegadorPanel elemento = new ElementosNavegadorPanel(ruta,"Pestana" + numeroDePestana,this);
         this.contenedorTabbedPane1.add("Pestana" + numeroDePestana, elemento);
         this.contenedorTabbedPane1.setSelectedComponent(elemento);
         return elemento;

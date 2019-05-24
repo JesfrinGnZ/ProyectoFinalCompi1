@@ -26,6 +26,7 @@ parser code {:
     private ManejadorDeTextArea manejadorDeTextArea;
     private ArrayList<Variable> tablaDeSimbolos;
     private ArrayList<ErrorAnalisis> erroresEnAnalisis;
+    private String texto;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;//----->Quizas no lo necesitemos
     ArrayList<Nodo> instruccionesParaIf;
     ArrayList<Nodo> instruccionesElseParaIf;
@@ -41,7 +42,7 @@ parser code {:
         this.tablaDeSimbolos=tablaDeSimbolos;
         this.manejadorDeVariables = new ManejadorDeTablaDeSimbolos(tablaDeSimbolos);
         this.erroresEnAnalisis=erroresEnAnalisis;
-        
+        this.texto="";
         
         this.instruccionesParaIf=new ArrayList<>();
         this.instruccionesElseParaIf=new ArrayList<>();
@@ -49,6 +50,10 @@ parser code {:
         this.textoAEscribir=new ArrayList<>();
         this.atributos=new ArrayList<>();
         this.etiquetas=new ArrayList<>();
+    }
+
+    public String getTexto(){
+        return this.texto;
     }
 
 //Metodo al que se llama automaticamente ante algun error sintactico
@@ -200,7 +205,7 @@ non terminal String             conjuntoDeInstrucciones,unaInstruccion;
 
 non terminal String     conjuntoDeEtiquetas,etiqueta,texto,atributos,unAtributo,etiquetaNoAnidable;
 non terminal Object     atributosParrafo;
-non terminal String     p,p1,p2;
+non terminal String     p,p0,p1,p2;
 non terminal String     s1,s2;
 non terminal String     etiquetaBody,etiquetaParrafo,etiquetaFont,etiquetaHR;
 non terminal String     unAtributoBody,unAtributoFont,unAtributosHr;
@@ -217,18 +222,21 @@ start with p;
 
 
 //-----------------------------------------HTML-----------------------------------------
+    
 
-                                            //Encabezado//
+                                       //Encabezado//
 p::=MENOR E_HTML MAYOR p1:e MENOR DIV E_HTML MAYOR//Con head
     {:String total="<html>"+e+"</html>";
     System.out.println("******************************************");
     System.out.println(total);
+    texto=total;
     System.out.println("******************************************");
 :};
 p::=MENOR E_HTML MAYOR p2:e MENOR DIV E_HTML MAYOR
     {:String total="<html>"+e+"</html>";
     System.out.println("******************************************");
     System.out.println(total);
+    texto=total;
     System.out.println("******************************************");
 :};//Sin head
 p::=error;   
@@ -242,23 +250,23 @@ p1::=MENOR E_HEAD MAYOR MENOR E_TITLE MAYOR conjuntoDeTexto2:i MENOR DIV E_TITLE
                                            //Body//
 p2::=MENOR etiquetaBody:i MAYOR s1:e MENOR DIV E_BODY MAYOR{:RESULT="<"+i+">"+e+"</body>";:}
     |error;
-    
+
 s1::=s1:e MENOR etiquetaParrafo:i MAYOR s2:f MENOR DIV E_PARRAFO MAYOR{:RESULT=e+"<"+i+">"+f+"</p>\n";:}|
         MENOR etiquetaParrafo:i MAYOR s2:f MENOR DIV E_PARRAFO MAYOR{:RESULT="<"+i+">"+f+"</p>\n";:}|
      s1:e MENOR E_CENTER MAYOR s2:f MENOR DIV E_CENTER MAYOR{:RESULT=e+"<center>"+f+"</center>\n";:}|
         MENOR E_CENTER MAYOR s2:f MENOR DIV E_CENTER MAYOR{:RESULT="<center>"+f+"</center>\n";:}|
      s1:e MENOR etiquetaFont:i MAYOR s2:f MENOR DIV E_FONT MAYOR{:RESULT=e+"<"+i+">"+f+"</font>\n";:}|
         MENOR etiquetaFont:i MAYOR s2:f MENOR DIV E_FONT MAYOR{:RESULT="<"+i+">"+f+"</font>\n";:}|
-     s1:e MENOR E_BR MAYOR s2:f MENOR DIV E_BR MAYOR{:RESULT=e+"<br>"+f+"</br>\n";:}|
-        MENOR E_BR MAYOR s2:f MENOR DIV E_BR MAYOR{:RESULT="<br>"+f+"</br>\n";:}|
-     s1:e MENOR E_NOBR MAYOR s2:f MENOR DIV E_NOBR MAYOR{:RESULT=e+"<nobr>"+f+"</nobr>\n";:}|
-        MENOR E_NOBR MAYOR s2:f MENOR DIV E_NOBR MAYOR{:RESULT="<nobr>"+f+"</nobr>\n";:}|
      s1:e MENOR PORCENTAJE  conjuntoDeInstrucciones:i PORCENTAJE MAYOR
         {:RESULT=e+i;:}|
         MENOR PORCENTAJE  conjuntoDeInstrucciones:i PORCENTAJE MAYOR
         {:RESULT=i;:}|
         error;
 
+s2::=s2:e MENOR E_BR MAYOR {:RESULT=e+"<br>";:}|
+        MENOR E_BR MAYOR {:RESULT="<br>";:};
+s2::= s2:e MENOR E_NOBR MAYOR s2:f MENOR DIV E_NOBR MAYOR{:RESULT=e+"<nobr>"+f+"</nobr>\n";:}|
+        MENOR E_NOBR MAYOR s2:f MENOR DIV E_NOBR MAYOR{:RESULT="<nobr>"+f+"</nobr>\n";:};
 s2::=s2:e MENOR E_NEGRILLA MAYOR s2:i MENOR DIV E_NEGRILLA MAYOR{:RESULT=e+"<b>"+i+"</b>";:}|
         MENOR E_NEGRILLA MAYOR s2:i MENOR DIV E_NEGRILLA MAYOR{:RESULT="<b>"+i+"</b>";:}|
      s2:e MENOR E_SUBRAYADO MAYOR s2:i MENOR DIV E_SUBRAYADO MAYOR{:RESULT=e+"<u>"+i+"</u>";:}|
