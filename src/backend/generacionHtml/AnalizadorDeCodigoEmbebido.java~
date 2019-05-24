@@ -4,7 +4,9 @@
 
 package backend.generacionHtml;
 import java_cup.runtime.*;
+import backend.errores.*;
 import static backend.generacionHtml.sym.*;
+import java.util.ArrayList;
 
 
 
@@ -884,7 +886,10 @@ public class AnalizadorDeCodigoEmbebido implements java_cup.runtime.Scanner {
   private int zzFinalHighSurrogate = 0;
 
   /* user code: */
-
+  
+  private String cadena="";
+  private ArrayList<ErrorAnalisis> erroresEnAnalisis;
+  
   private Symbol symbol(int type) {
     return new Symbol(type, yyline+1, yycolumn+1);
   }
@@ -892,7 +897,10 @@ public class AnalizadorDeCodigoEmbebido implements java_cup.runtime.Scanner {
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline+1, yycolumn+1, value);
   }
-  
+
+  public void iniciarListaDeErrores(ArrayList<ErrorAnalisis> erroresEnAnalisis){
+        this.erroresEnAnalisis=erroresEnAnalisis;
+    }
 
 
 
@@ -1280,7 +1288,8 @@ public class AnalizadorDeCodigoEmbebido implements java_cup.runtime.Scanner {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1: 
-            { /*Error lexico*/
+            { ErrorLexico nuevoError = new ErrorLexico(yyline,yycolumn,"Token no valido:"+yytext());
+              erroresEnAnalisis.add(nuevoError);
             } 
             // fall through
           case 84: break;

@@ -23,6 +23,7 @@ public class CicloFor extends Nodo {
     public String id;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;
     private Variable variable;
+    private String texto;
     
     public CicloFor(int numeroDeLinea, int numeroDeColumna, String numero1, String numero2, ArrayList<Nodo> instruccionesDeFor, String id,ManejadorDeTablaDeSimbolos man) {
         this.numeroDeLinea = numeroDeLinea;
@@ -33,6 +34,15 @@ public class CicloFor extends Nodo {
         this.id=id;
         this.manejadorDeVariables=man;
         this.variable = manejadorDeVariables.verificarSiExisteVariable(id);
+        this.texto="";
+    }
+
+    public String getTexto() {
+        return texto;
+    }
+
+    public void setTexto(String texto) {
+        this.texto = texto;
     }
 
     public int getNumero1() {

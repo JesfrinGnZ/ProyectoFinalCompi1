@@ -27,19 +27,19 @@ public class ProyectoFinalCompi1 {
     public static void main(String[] args) {
         NavegadorFrame nav = new NavegadorFrame();
         nav.setVisible(true);
-        String operaciones="2*3+4*3";
-        int n=1*8-5+8/3-9*2/5*3+2;
-        AnalizadorDeCodigoEmbebido lex = new AnalizadorDeCodigoEmbebido(new BufferedReader(new StringReader(operaciones)));
-        parser sintactico = new parser(lex);
-        try {
-            sintactico.parse();
-        } catch (Exception ex) {
-            Logger.getLogger(ProyectoFinalCompi1.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        boolean b=true;
-        boolean b1=false;
-        boolean b2=b && b1;
+//        String operaciones="2*3+4*3";
+//        int n=1*8-5+8/3-9*2/5*3+2;
+//        AnalizadorDeCodigoEmbebido lex = new AnalizadorDeCodigoEmbebido(new BufferedReader(new StringReader(operaciones)));
+//        parser sintactico = new parser(lex);
+//        try {
+//            sintactico.parse();
+//        } catch (Exception ex) {
+//            Logger.getLogger(ProyectoFinalCompi1.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//        boolean b=true;
+//        boolean b1=false;
+//        boolean b2=b && b1;
         
         //Esto se crea en f-->numero|id
         Operando o1= new Operando(0, 0, "1");
@@ -56,6 +56,6 @@ public class ProyectoFinalCompi1 {
 //        OperacionBinaria rest2 = new OperacionBinaria(0, 0, suma2, o6, "-");
        // int valor=ManejadorDeExpresionesAritmeticas.recorridoDeOperaciones(rest2);
         //System.out.println("Valor calculado de operacion nueva:"+valor);
-        System.out.println("n:"+n);
+//        System.out.println("n:"+n);
     }
 }

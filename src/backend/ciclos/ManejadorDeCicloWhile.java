@@ -13,9 +13,11 @@ import backend.asignacionCreacionDeVariables.ManejadorDeAsignacionDeExpresiones;
 import backend.asignacionCreacionDeVariables.ManejadorDeCreacionDeVariables;
 import backend.condiciones.Condicion;
 import backend.condiciones.ManejadorDeCondiciones;
+import backend.errores.ErrorAnalisis;
 import backend.expesionesBooleanas.ManejadorDeExpresionesBooleanas;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
+import java.util.ArrayList;
 
 /**
  *
@@ -25,49 +27,55 @@ public class ManejadorDeCicloWhile {
 
     private CicloWhile cicloWhile;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;
-
-    public ManejadorDeCicloWhile(CicloWhile cicloWhile, ManejadorDeTablaDeSimbolos man) {
+    private ArrayList<ErrorAnalisis> listaDeErrores;
+    
+    public ManejadorDeCicloWhile(CicloWhile cicloWhile, ManejadorDeTablaDeSimbolos man,ArrayList<ErrorAnalisis> listaDeErrores) {
         this.cicloWhile = cicloWhile;
         this.manejadorDeVariables = man;
+        this.listaDeErrores=listaDeErrores;
     }
 
     public void realizarOperaciones() {
         ManejadorDeExpresionesBooleanas man3 = new ManejadorDeExpresionesBooleanas(this.manejadorDeVariables);
         boolean nuevoValor2 = man3.recorridoDeExpresion(this.cicloWhile.getEx());
-        if(!man3.existioErrorAlRealizarLaOperacion()){
-            while(nuevoValor2){
+        if (!man3.existioErrorAlRealizarLaOperacion()) {
+            while (nuevoValor2) {
                 for (Nodo instruccion : cicloWhile.getInstrucciones()) {
                     if (instruccion instanceof Variable) {//Variable--->Es como un nodo declaracion
                         Variable variable = ((Variable) instruccion);
-                        ManejadorDeCreacionDeVariables manDeVariables = new ManejadorDeCreacionDeVariables(manejadorDeVariables, variable);
+                        ManejadorDeCreacionDeVariables manDeVariables = new ManejadorDeCreacionDeVariables(manejadorDeVariables, variable,listaDeErrores);
                         manDeVariables.crearVariable();
                     } else if (instruccion instanceof Asignacion) {
                         Asignacion asignacion = ((Asignacion) instruccion);
                         asignacion.setVariable(manejadorDeVariables.verificarSiExisteVariable(asignacion.getIdDeVariable()));
-                        ManejadorDeAsignacionDeExpresiones manDeAsignaciones = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion, true);
+                        ManejadorDeAsignacionDeExpresiones manDeAsignaciones = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion, true,listaDeErrores);
                         manDeAsignaciones.asignacionDeVariable();
                     } else if (instruccion instanceof Escritura) {
                         Escritura escritura = ((Escritura) instruccion);
-                        ManejadorDeEscritura manDeEscritura = new ManejadorDeEscritura(escritura, manejadorDeVariables);
+                        ManejadorDeEscritura manDeEscritura = new ManejadorDeEscritura(escritura, manejadorDeVariables,listaDeErrores);
                         manDeEscritura.manejarEscritura();
+                        this.cicloWhile.setTexto(this.cicloWhile.getTexto() + escritura.getTextoGenerado());
                     } else if (instruccion instanceof Condicion) {
                         Condicion nuevaCondicion = ((Condicion) instruccion);
-                        ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(nuevaCondicion, manejadorDeVariables);
+                        ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(nuevaCondicion, manejadorDeVariables,listaDeErrores);
                         manejador.realizarOperaciones();
+                        this.cicloWhile.setTexto(this.cicloWhile.getTexto() + nuevaCondicion.getTexto());
                     } else if (instruccion instanceof CicloFor) {
                         CicloFor cicloF = ((CicloFor) instruccion);
                         cicloF.setVariable(manejadorDeVariables.verificarSiExisteVariable(cicloF.getId()));
-                        ManejadorDeCicloFor manejadorF = new ManejadorDeCicloFor(cicloF, manejadorDeVariables);
+                        ManejadorDeCicloFor manejadorF = new ManejadorDeCicloFor(cicloF, manejadorDeVariables,listaDeErrores);
                         manejadorF.realizarOperaciones();
-                    } else if(instruccion instanceof CicloWhile){
-                        CicloWhile ciclo =((CicloWhile) instruccion);
-                        ManejadorDeCicloWhile manW = new ManejadorDeCicloWhile(ciclo, manejadorDeVariables);
+                        this.cicloWhile.setTexto(this.cicloWhile.getTexto() + cicloF.getTexto());
+                    } else if (instruccion instanceof CicloWhile) {
+                        CicloWhile ciclo = ((CicloWhile) instruccion);
+                        ManejadorDeCicloWhile manW = new ManejadorDeCicloWhile(ciclo, manejadorDeVariables,listaDeErrores);
                         manW.realizarOperaciones();
+                        this.cicloWhile.setTexto(this.cicloWhile.getTexto() + ciclo.getTexto());
                     }
                 }
                 nuevoValor2 = man3.recorridoDeExpresion(this.cicloWhile.getEx());
             }
-        }else{
+        } else {
             System.out.println("Existioo un error con la expresion del While");
         }
     }

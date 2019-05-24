@@ -18,6 +18,7 @@ public class Condicion extends Nodo{
     private Expresion ex1;
     private ArrayList<Nodo> instruccionesAceptacion;
     private ArrayList<Nodo> instruccionesRechazo;
+    private String texto;
     
     public Condicion(int numeroDeLinea,int numeroDeColumna,Expresion ex1,ArrayList<Nodo> instrucciones,ArrayList<Nodo> instruccionesRechazo){
         this.numeroDeLinea=numeroDeLinea;
@@ -25,6 +26,7 @@ public class Condicion extends Nodo{
         this.ex1=ex1;
         this.instruccionesAceptacion=instrucciones;
         this.instruccionesRechazo=instruccionesRechazo ;
+        this.texto="";
     }
 
     public ArrayList<Nodo> getInstruccionesAceptacion() {
@@ -70,6 +72,14 @@ public class Condicion extends Nodo{
     @Override
     public void setNumeroDeColumna(int numeroDeColumna) {
         this.numeroDeColumna = numeroDeColumna;
+    }
+
+    public String getTexto() {
+        return texto;
+    }
+
+    public void setTexto(String texto) {
+        this.texto = texto;
     }
     
     

@@ -17,12 +17,22 @@ public class CicloWhile extends Nodo{
     
     private Expresion ex;
     private ArrayList<Nodo> instrucciones;
+    private String texto;
     
     public CicloWhile(int numeroDeLinea,int numeroDeColumna,Expresion ex,ArrayList<Nodo> instrucciones){
         this.numeroDeLinea=numeroDeLinea;
         this.numeroDeColumna=numeroDeColumna;
         this.ex=ex;
         this.instrucciones=instrucciones;
+        this.texto="";
+    }
+
+    public String getTexto() {
+        return texto;
+    }
+
+    public void setTexto(String texto) {
+        this.texto = texto;
     }
 
     public Expresion getEx() {

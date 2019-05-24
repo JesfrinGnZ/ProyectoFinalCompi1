@@ -15,13 +15,24 @@ import java.util.ArrayList;
 public class Escritura extends Nodo{
     
     private ArrayList<Nodo> instrucciones;
-    
+    private String textoGenerado;
+
+
     public Escritura(int numeroDeLinea,int numeroDeColumna,ArrayList<Nodo> instrucciones){
         this.instrucciones=instrucciones;
         this.numeroDeLinea=numeroDeLinea;
         this.numeroDeColumna=numeroDeColumna;
+        this.textoGenerado="";
     }
 
+    public String getTextoGenerado() {
+        return textoGenerado;
+    }
+
+    public void setTextoGenerado(String textoGenerado) {
+        this.textoGenerado = textoGenerado;
+    }
+    
     public ArrayList<Nodo> getInstrucciones() {
         return instrucciones;
     }

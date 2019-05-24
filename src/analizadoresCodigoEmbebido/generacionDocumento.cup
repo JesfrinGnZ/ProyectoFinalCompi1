@@ -9,6 +9,7 @@ import backend.AccionesMatematicas.*;
 import backend.asignacionCreacionDeVariables.*;
 import backend.Escritura.*;
 import backend.Etiquetas.*;
+import backend.errores.*;
 import backend.condiciones.*;
 import backend.ciclos.*;
 import backend.expresiones.*;
@@ -24,6 +25,7 @@ parser code {:
 
     private ManejadorDeTextArea manejadorDeTextArea;
     private ArrayList<Variable> tablaDeSimbolos;
+    private ArrayList<ErrorAnalisis> erroresEnAnalisis;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;//----->Quizas no lo necesitemos
     ArrayList<Nodo> instruccionesParaIf;
     ArrayList<Nodo> instruccionesElseParaIf;
@@ -33,11 +35,14 @@ parser code {:
     ArrayList<Etiqueta> etiquetas;
 
     // Connect this parser to a scanner!
-    public parser(AnalizadorDeCodigoEmbebido lex,ArrayList<Variable> tablaDeSimbolos,ManejadorDeTextArea manejadorDeTextArea) {
+    public parser(AnalizadorDeCodigoEmbebido lex,ArrayList<Variable> tablaDeSimbolos,ManejadorDeTextArea manejadorDeTextArea,ArrayList<ErrorAnalisis> erroresEnAnalisis) {
 	super(lex);
         this.manejadorDeTextArea=manejadorDeTextArea;
         this.tablaDeSimbolos=tablaDeSimbolos;
         this.manejadorDeVariables = new ManejadorDeTablaDeSimbolos(tablaDeSimbolos);
+        this.erroresEnAnalisis=erroresEnAnalisis;
+        
+        
         this.instruccionesParaIf=new ArrayList<>();
         this.instruccionesElseParaIf=new ArrayList<>();
         this.instruccionesPrint=new ArrayList<>();
@@ -48,12 +53,17 @@ parser code {:
 
 //Metodo al que se llama automaticamente ante algun error sintactico
     public void syntax_error(Symbol s){        
-        System.out.println("ERROR EN ESTRUCTURA:"+s.value.toString());
-    }
+        System.out.println("ERROR EN ESTRUCTURA:"+s.value.toString()+" "+s.left+" "+s.right);
+        String lexema = s.value.toString();
+        int linea = s.left;
+        int columna = s.right;
+        ErrorSintactico nuevoError = new ErrorSintactico(linea,columna,"Error sintactico,token:"+lexema);
+        erroresEnAnalisis.add(nuevoError);
+}
 
     //Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{        
-                System.out.println("ERROR EN ESTRUCTURA:"+s);
+                //System.out.println("ERROR EN ESTRUCTURA:"+s);
     }
 
 
@@ -162,7 +172,7 @@ terminal String         MAS,MENOS,POR,DIV,MAYOR,MENOR,DOS_PUNTOS,IGUAL,PARENTESI
 
 /****************************************Condiconal***********************/
 
-non terminal Object             cicloWhile,cicloFor,condicional;
+non terminal String             cicloWhile,cicloFor,condicional;
 non terminal ArrayList<Nodo>    bloque,conjuntoDeInstruccionesComplejas;
 non terminal Nodo               unaInstruccionCompleja;
 
@@ -184,18 +194,19 @@ non terminal ExpresionConCadena     expresionCadena,cadena,tipoDeCadena;
 
 
 
-non terminal Object             conjuntoDeInstrucciones,unaInstruccion;
+non terminal String             conjuntoDeInstrucciones,unaInstruccion;
 
 /****************************************HTML***********************/
 
 non terminal String     conjuntoDeEtiquetas,etiqueta,texto,atributos,unAtributo,etiquetaNoAnidable;
 non terminal Object     atributosParrafo;
-non terminal Object     p,p1,p2;
-non terminal ArrayList<Etiqueta> s1,s2;
-non terminal Object etiquetaBody,etiquetaParrafo,etiquetaFont,etiquetaHR;
-non terminal AtributoDeEtiqueta     unAtributoBody,unAtributoFont,unAtributosHr;
-non terminal ArrayList<Etiqueta>    atributosBody,atributosFont,atributosHR;
-
+non terminal String     p,p1,p2;
+non terminal String     s1,s2;
+non terminal String     etiquetaBody,etiquetaParrafo,etiquetaFont,etiquetaHR;
+non terminal String     unAtributoBody,unAtributoFont,unAtributosHr;
+non terminal String   atributosBody,atributosFont,atributosHR;
+non terminal String    conjuntoDeTexto2;
+non terminal String               texto2;
 /*--------------- 3ra Area: Reglas Semanticas -----------------------*/
 
 precedence left OR;
@@ -208,212 +219,171 @@ start with p;
 //-----------------------------------------HTML-----------------------------------------
 
                                             //Encabezado//
-p::=MENOR E_HTML MAYOR p1 MENOR DIV E_HTML MAYOR//Con head
-    {:manejadorDeTextArea.setEtiquetas(etiquetas);
-     manejadorDeTextArea.manejarEtiqueta();:};
-p::=MENOR E_HTML MAYOR p2 MENOR DIV E_HTML MAYOR;//Sin head
-                                            //Head//
-p1::=MENOR E_HEAD MAYOR MENOR DIV E_HEAD MAYOR p2;
-p1::=MENOR E_HEAD MAYOR MENOR E_TITLE:i MAYOR conjuntoDeTexto MENOR DIV E_TITLE MAYOR MENOR DIV E_HEAD MAYOR p2
-    {:
-    atributos=new ArrayList<>();
-    textoAEscribir=new ArrayList<>();
-    System.out.println(textoAEscribir.size());:};
+p::=MENOR E_HTML MAYOR p1:e MENOR DIV E_HTML MAYOR//Con head
+    {:String total="<html>"+e+"</html>";
+    System.out.println("******************************************");
+    System.out.println(total);
+    System.out.println("******************************************");
+:};
+p::=MENOR E_HTML MAYOR p2:e MENOR DIV E_HTML MAYOR
+    {:String total="<html>"+e+"</html>";
+    System.out.println("******************************************");
+    System.out.println(total);
+    System.out.println("******************************************");
+:};//Sin head
+p::=error;   
+
+                                         //Head//
+p1::=MENOR E_HEAD MAYOR MENOR DIV E_HEAD MAYOR p2:i
+     {:RESULT="<head></head>"+i;:};
+p1::=MENOR E_HEAD MAYOR MENOR E_TITLE MAYOR conjuntoDeTexto2:i MENOR DIV E_TITLE MAYOR MENOR DIV E_HEAD MAYOR p2:e
+    {:RESULT="<head><title>"+i+"</title></head>"+e+"\n";:};
 
                                            //Body//
-p2::=MENOR E_BODY MAYOR s1 MENOR DIV E_BODY MAYOR;
+p2::=MENOR etiquetaBody:i MAYOR s1:e MENOR DIV E_BODY MAYOR{:RESULT="<"+i+">"+e+"</body>";:}
+    |error;
+    
+s1::=s1:e MENOR etiquetaParrafo:i MAYOR s2:f MENOR DIV E_PARRAFO MAYOR{:RESULT=e+"<"+i+">"+f+"</p>\n";:}|
+        MENOR etiquetaParrafo:i MAYOR s2:f MENOR DIV E_PARRAFO MAYOR{:RESULT="<"+i+">"+f+"</p>\n";:}|
+     s1:e MENOR E_CENTER MAYOR s2:f MENOR DIV E_CENTER MAYOR{:RESULT=e+"<center>"+f+"</center>\n";:}|
+        MENOR E_CENTER MAYOR s2:f MENOR DIV E_CENTER MAYOR{:RESULT="<center>"+f+"</center>\n";:}|
+     s1:e MENOR etiquetaFont:i MAYOR s2:f MENOR DIV E_FONT MAYOR{:RESULT=e+"<"+i+">"+f+"</font>\n";:}|
+        MENOR etiquetaFont:i MAYOR s2:f MENOR DIV E_FONT MAYOR{:RESULT="<"+i+">"+f+"</font>\n";:}|
+     s1:e MENOR E_BR MAYOR s2:f MENOR DIV E_BR MAYOR{:RESULT=e+"<br>"+f+"</br>\n";:}|
+        MENOR E_BR MAYOR s2:f MENOR DIV E_BR MAYOR{:RESULT="<br>"+f+"</br>\n";:}|
+     s1:e MENOR E_NOBR MAYOR s2:f MENOR DIV E_NOBR MAYOR{:RESULT=e+"<nobr>"+f+"</nobr>\n";:}|
+        MENOR E_NOBR MAYOR s2:f MENOR DIV E_NOBR MAYOR{:RESULT="<nobr>"+f+"</nobr>\n";:}|
+     s1:e MENOR PORCENTAJE  conjuntoDeInstrucciones:i PORCENTAJE MAYOR
+        {:RESULT=e+i;:}|
+        MENOR PORCENTAJE  conjuntoDeInstrucciones:i PORCENTAJE MAYOR
+        {:RESULT=i;:}|
+        error;
 
-s1::=s1 MENOR etiquetaBody MAYOR s2 MENOR DIV E_BODY MAYOR|
-        MENOR etiquetaBody MAYOR s2 MENOR DIV E_BODY MAYOR|
-     s1 MENOR etiquetaParrafo MAYOR s2 MENOR DIV E_PARRAFO MAYOR|
-        MENOR etiquetaParrafo MAYOR s2 MENOR DIV E_PARRAFO MAYOR|
-     s1 MENOR E_CENTER MAYOR s2 MENOR DIV E_CENTER MAYOR|
-        MENOR E_CENTER MAYOR s2 MENOR DIV E_CENTER MAYOR|
-     s1 MENOR etiquetaFont MAYOR s2 MENOR DIV E_FONT MAYOR|
-        MENOR etiquetaFont MAYOR s2 MENOR DIV E_FONT MAYOR|
-     s1 MENOR E_BR MAYOR s2 MENOR DIV E_BR MAYOR|
-        MENOR E_BR MAYOR s2 MENOR DIV E_BR MAYOR|
-     s1 MENOR E_NOBR MAYOR s2 MENOR DIV E_NOBR MAYOR|
-        MENOR E_NOBR MAYOR s2 MENOR DIV E_NOBR MAYOR|
-     s1 MENOR PORCENTAJE  conjuntoDeInstrucciones PORCENTAJE MAYOR|
-        MENOR PORCENTAJE  conjuntoDeInstrucciones PORCENTAJE MAYOR;
-
-s2::=s2 MENOR E_NEGRILLA MAYOR s2 MENOR DIV E_NEGRILLA MAYOR|
-        MENOR E_NEGRILLA MAYOR s2 MENOR DIV E_NEGRILLA MAYOR|
-     s2 MENOR E_SUBRAYADO MAYOR s2 MENOR DIV E_SUBRAYADO MAYOR|
-        MENOR E_SUBRAYADO MAYOR s2 MENOR DIV E_SUBRAYADO MAYOR|
-     s2 MENOR E_ITALICA MAYOR s2 MENOR DIV E_ITALICA MAYOR|
-        MENOR E_ITALICA MAYOR s2 MENOR DIV E_ITALICA MAYOR|
-     s2 MENOR E_STRIKE MAYOR s2 MENOR DIV E_STRIKE MAYOR|
-        MENOR E_STRIKE MAYOR s2 MENOR DIV E_STRIKE MAYOR|
-     s2 MENOR E_BLINK MAYOR s2 MENOR DIV E_BLINK MAYOR|
-        MENOR E_BLINK MAYOR s2 MENOR DIV E_BLINK MAYOR|
-     s2 MENOR E_SUB MAYOR s2 MENOR DIV E_SUB MAYOR|
-        MENOR E_SUB MAYOR s2 MENOR DIV E_SUB MAYOR|        
-     s2 MENOR E_SUP MAYOR s2 MENOR DIV E_SUP MAYOR|
-        MENOR E_SUP MAYOR s2 MENOR DIV E_SUP MAYOR|
-     s2 MENOR E_BLOCKQUOTE MAYOR s2 MENOR DIV E_BLOCKQUOTE MAYOR|
-        MENOR E_BLOCKQUOTE MAYOR s2 MENOR DIV E_BLOCKQUOTE MAYOR|
-     s2 MENOR E_A NAME IGUAL ORACION_TIPO_ATRIBUTO MAYOR s2 MENOR DIV E_A NAME IGUAL ORACION_TIPO_ATRIBUTO MAYOR|
-        MENOR E_A NAME IGUAL ORACION_TIPO_ATRIBUTO MAYOR s2 MENOR DIV E_A NAME IGUAL ORACION_TIPO_ATRIBUTO MAYOR|
-     s2 MENOR E_HREF ORACION_TIPO_ATRIBUTO MAYOR s2 MENOR DIV E_HREF ORACION_TIPO_ATRIBUTO MAYOR|
-        MENOR E_HREF ORACION_TIPO_ATRIBUTO MAYOR s2 MENOR DIV E_HREF ORACION_TIPO_ATRIBUTO MAYOR|
-     s2 MENOR etiquetaHR MAYOR s2 MENOR DIV etiquetaHR MAYOR|
-        MENOR etiquetaHR MAYOR s2 MENOR DIV etiquetaHR MAYOR|
-     s2 MENOR PORCENTAJE conjuntoDeInstrucciones PORCENTAJE MAYOR|
-        MENOR PORCENTAJE conjuntoDeInstrucciones PORCENTAJE MAYOR;        
+s2::=s2:e MENOR E_NEGRILLA MAYOR s2:i MENOR DIV E_NEGRILLA MAYOR{:RESULT=e+"<b>"+i+"</b>";:}|
+        MENOR E_NEGRILLA MAYOR s2:i MENOR DIV E_NEGRILLA MAYOR{:RESULT="<b>"+i+"</b>";:}|
+     s2:e MENOR E_SUBRAYADO MAYOR s2:i MENOR DIV E_SUBRAYADO MAYOR{:RESULT=e+"<u>"+i+"</u>";:}|
+        MENOR E_SUBRAYADO MAYOR s2:i MENOR DIV E_SUBRAYADO MAYOR{:RESULT="<u>"+i+"</u>";:}|
+     s2:e MENOR E_ITALICA MAYOR s2:i MENOR DIV E_ITALICA MAYOR{:RESULT=e+"<i>"+i+"</i>";:}|
+        MENOR E_ITALICA MAYOR s2:i MENOR DIV E_ITALICA MAYOR{:RESULT="<i>"+i+"</i>";:}|
+     s2:e MENOR E_STRIKE MAYOR s2:i MENOR DIV E_STRIKE MAYOR{:RESULT=e+"<strike>"+i+"</strike>";:}|
+        MENOR E_STRIKE MAYOR s2:i MENOR DIV E_STRIKE MAYOR{:RESULT="<strike>"+i+"</strike>";:}|
+     s2:e MENOR E_BLINK MAYOR s2:i MENOR DIV E_BLINK MAYOR{:RESULT=e+"<blink>"+i+"</blink>";:}|
+        MENOR E_BLINK MAYOR s2:i MENOR DIV E_BLINK MAYOR{:RESULT="<blink>"+i+"</blink>";:}|
+     s2:e MENOR E_SUB MAYOR s2:i MENOR DIV E_SUB MAYOR{:RESULT=e+"<sub>"+i+"</sub>";:}|
+        MENOR E_SUB MAYOR s2:i MENOR DIV E_SUB MAYOR{:RESULT="<sub>"+i+"</sub>";:}|        
+     s2:e MENOR E_SUP MAYOR s2:i MENOR DIV E_SUP MAYOR{:RESULT=e+"<sup>"+i+"</sup>";:}|
+        MENOR E_SUP MAYOR s2:i MENOR DIV E_SUP MAYOR{:RESULT="<sup>"+i+"</sup>";:}|
+     s2:e MENOR E_BLOCKQUOTE MAYOR s2:i MENOR DIV E_BLOCKQUOTE MAYOR{:RESULT=e+"<blockquote>"+i+"</blockquote>";:}|
+        MENOR E_BLOCKQUOTE MAYOR s2:i MENOR DIV E_BLOCKQUOTE MAYOR{:RESULT="<blockquote>"+i+"</blockquote>";:}|
+     s2:e MENOR E_A NAME IGUAL ORACION_TIPO_ATRIBUTO:i MAYOR s2:f MENOR DIV E_A MAYOR
+         {:RESULT=e+"<a name ="+i+">"+f+"</a>";:}|
+        MENOR E_A NAME IGUAL ORACION_TIPO_ATRIBUTO:i MAYOR s2:f MENOR DIV E_A MAYOR
+        {:RESULT="<a name ="+i+">"+f+"</a>";:}|
+     s2:e MENOR E_HREF ORACION_TIPO_ATRIBUTO:i MAYOR s2:f MENOR DIV E_HREF MAYOR
+        {:RESULT=e+"<a href ="+i+">"+f+"</a>";:}|
+        MENOR E_HREF ORACION_TIPO_ATRIBUTO:i MAYOR s2:f MENOR DIV E_HREF MAYOR
+        {:RESULT="<a name ="+i+">"+f+"</a>";:}|
+     s2:e MENOR etiquetaHR:i MAYOR s2:f MENOR DIV E_HR MAYOR
+        {:RESULT=e+"<"+i+">"+f+"</hr>";:}|
+        MENOR etiquetaHR:i MAYOR s2:f MENOR DIV E_HR MAYOR
+        {:RESULT="<"+i+">"+f+"</hr>";:}|
+     
+    s2:e MENOR PORCENTAJE conjuntoDeInstrucciones:i PORCENTAJE MAYOR
+         {:RESULT=e+i;:}|
+        MENOR PORCENTAJE conjuntoDeInstrucciones:i PORCENTAJE MAYOR
+         {:RESULT=i;:}|
+         error;
 
 
                                         //Parrafo
-etiquetaParrafo::=E_PARRAFO |
-           E_PARRAFO ALIGN IGUAL ORACION_TIPO_ATRIBUTO; 
+etiquetaParrafo::=E_PARRAFO:i{:RESULT=i;:} |
+           E_PARRAFO:i ALIGN:e IGUAL:f ORACION_TIPO_ATRIBUTO:g{:RESULT=i+e+f+g;:}; 
 
-etiquetaBody::=E_BODY;
-etiquetaBody::=E_BODY atributosBody;
-atributosBody::=atributosBody unAtributoBody|unAtributoBody;
-unAtributoBody::= BGCOLOR IGUAL ORACION_TIPO_ATRIBUTO;
-unAtributoBody::= TEXT IGUAL ORACION_TIPO_ATRIBUTO;
-unAtributoBody::= LINK IGUAL ORACION_TIPO_ATRIBUTO;
+etiquetaBody::=E_BODY:i {:RESULT=i;:};
+etiquetaBody::=E_BODY:i atributosBody:e{:RESULT=i+e;:};
+atributosBody::=atributosBody:i unAtributoBody:e{:RESULT=i+e;:}|unAtributoBody:i{:RESULT=i;:};
+unAtributoBody::= BGCOLOR IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="bgcolor ="+i+" ";:};
+unAtributoBody::= TEXT IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="text ="+i+" ";:};
+unAtributoBody::= LINK IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="link ="+i+" ";:};
 
-etiquetaFont::=E_FONT;
-etiquetaFont::=E_FONT atributosFont;
-atributosFont::=atributosFont unAtributoFont | unAtributoFont;
-atributosFont::=SIZE IGUAL ORACION_TIPO_ATRIBUTO;
-atributosFont::=ALIGN IGUAL ORACION_TIPO_ATRIBUTO;
-atributosFont::=FACE IGUAL ORACION_TIPO_ATRIBUTO;
-atributosFont::=COLOR IGUAL ORACION_TIPO_ATRIBUTO;
-
-
-etiquetaHR::=E_HR;
-etiquetaHR::=E_HR atributosHR;
-atributosHR::=atributosHR unAtributosHr|unAtributosHr;
-unAtributosHr::=ALIGN IGUAL ORACION_TIPO_ATRIBUTO;
-unAtributosHr::=WIDTH IGUAL ORACION_TIPO_ATRIBUTO;
-unAtributosHr::=SIZE IGUAL ORACION_TIPO_ATRIBUTO;
+etiquetaFont::=E_FONT:i{:RESULT=i;:};
+etiquetaFont::=E_FONT:i atributosFont:e{:RESULT=i+e;:};
+atributosFont::=atributosFont:i unAtributoFont:e{:RESULT=i+e;:} | unAtributoFont:i{:RESULT=i;:};
+atributosFont::=SIZE IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="size ="+i+" ";:};
+atributosFont::=ALIGN IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="align ="+i+" ";:};
+atributosFont::=FACE IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="face ="+i+" ";:};
+atributosFont::=COLOR IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="color ="+i+" ";:};
 
 
-s2::=conjuntoDeTexto;
+etiquetaHR::=E_HR:i{:RESULT=i;:};
+etiquetaHR::=E_HR:i atributosHR:e{:RESULT=i+e;:};
+atributosHR::=atributosHR:i unAtributosHr:e{:RESULT=i+e;:}
+|unAtributosHr:i{:RESULT=i;:};
+unAtributosHr::=ALIGN IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="align="+i;:};
+unAtributosHr::=WIDTH IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="width="+i;:};
+unAtributosHr::=SIZE IGUAL ORACION_TIPO_ATRIBUTO:i{:RESULT="size=+i";:};
+
+
+s2::=conjuntoDeTexto2:i{:RESULT=i;:};
                                             //Texto//
-conjuntoDeTexto::= conjuntoDeTexto texto|texto;
-texto::= IDENTIFICADOR;
-texto::= DOS_PUNTOS;
+conjuntoDeTexto2::= conjuntoDeTexto2:i texto2:e
+                    {:RESULT=i+e;
+                    :}
+                    |texto2:e
+                     {:
+                     RESULT=e;
+                     :};
 
-
+texto2::=IDENTIFICADOR:i{:RESULT=i;:};
+texto2::=DOS_PUNTOS:i{:RESULT=i;:};
+texto2::=LT:i{:RESULT=i;:}|GT:i{:RESULT=i;:}|AMP:i{:RESULT=i;:}|AACUTE:i{:RESULT=i;:}|EACUTE:i{:RESULT=i;:}|
+IACUTE:i{:RESULT=i;:}|OACUTE:i{:RESULT=i;:}|UACUTE:i{:RESULT=i;:}|NTILDEM:i{:RESULT=i;:}|NTILDE:i{:RESULT=i;:};
 /*
+texto2::=BGCOLOR:i{:RESULT=i;:}|TEXT:i{:RESULT=i;:}|LINK:i{:RESULT=i;:}|ALIGN:i{:RESULT=i;:}|
+SIZE:i{:RESULT=i;:}|FACE:i{:RESULT=i;:}|COLOR:i{:RESULT=i;:}|TYPE:i{:RESULT=i;:}
+|START:i{:RESULT=i;:}|WIDTH:i{:RESULT=i;:}|NAME:i{:RESULT=i;:};
 
-
-                                            //Etiquetas//
-conjuntoDeEtiquetas::=conjuntoDeEtiquetas etiqueta | etiqueta;
-etiqueta::=MENOR PORCENTAJE conjuntoDeInstrucciones PORCENTAJE MAYOR;
-etiqueta::=MENOR E_CENTER MAYOR conjuntoDeTexto MENOR conjuntoDeTexto DIV E_CENTER MAYOR;//CENTER
-etiqueta::=MENOR E_PARRAFO MAYOR conjuntoDeTexto MENOR DIV E_PARRAFO MAYOR;//P
-etiqueta::=MENOR E_PARRAFO:i atributosParrafo MAYOR conjuntoDeTexto MENOR DIV E_PARRAFO MAYOR//P con atributos
-{:Etiqueta etiqueta = new Etiqueta(i,atributos,textoAEscribir);
-  etiquetas.add(etiqueta);
-   atributos=new ArrayList<>();
-   textoAEscribir=new ArrayList<>();
-   System.out.println("ETIQUETA:"+textoAEscribir.size()); :};
-etiqueta::=MENOR E_NEGRILLA MAYOR conjuntoDeTexto MENOR DIV E_NEGRILLA MAYOR;//Negrilla
-etiqueta::=MENOR E_SUBRAYADO MAYOR conjuntoDeTexto  MENOR DIV E_SUBRAYADO MAYOR;//Subrayado
-etiqueta::=MENOR E_ITALICA MAYOR conjuntoDeTexto MENOR DIV E_ITALICA MAYOR;//Negrilla
-etiqueta::=MENOR E_STRIKE MAYOR conjuntoDeTexto MENOR DIV E_STRIKE MAYOR;//TACHADO
-etiqueta::=MENOR E_BLINK MAYOR conjuntoDeTexto MENOR DIV E_BLINK MAYOR;//Parapadeante
-etiqueta::=MENOR E_SUB MAYOR conjuntoDeTexto MENOR DIV E_SUB MAYOR;//SubIndicce
-etiqueta::=MENOR E_SUP MAYOR conjuntoDeTexto MENOR DIV E_SUP MAYOR;//SuperIndice
-etiqueta::=MENOR E_FONT MAYOR conjuntoDeTexto MENOR DIV E_FONT MAYOR;//Tipo de letra
-etiqueta::=MENOR E_FONT atributos MAYOR conjuntoDeTexto MENOR DIV E_FONT MAYOR;//Tipo de letra con atributos
-etiqueta::=MENOR E_UL MAYOR MENOR DIV E_UL MAYOR;//Lista desordenada
-etiqueta::=MENOR E_UL atributos MAYOR MENOR DIV E_UL MAYOR;//Lista desordenada
-etiqueta::=MENOR E_OL  MAYOR MENOR DIV E_OL MAYOR;//Lista ORDENADA
-etiqueta::=MENOR E_OL atributos MAYOR MENOR DIV E_OL MAYOR;//Lista ORDENADA CON ATRIBUTOS
-etiqueta::=MENOR E_BR MAYOR;//Cambio de linea
-etiqueta::=MENOR E_NOBR MAYOR conjuntoDeTexto MENOR DIV E_NOBR MAYOR;//Texto sin cambios
-etiqueta::=MENOR E_HR atributos MAYOR;//Linea horizontal
-etiqueta::=MENOR E_BLOCKQUOTE MAYOR conjuntoDeTexto MENOR DIV E_BLOCKQUOTE MAYOR;//Aumenta la sangria
-etiqueta::=MENOR E_A MAYOR conjuntoDeTexto MENOR DIV E_A MAYOR;//Enlaces
-etiqueta::=MENOR E_HREF MAYOR conjuntoDeTexto MENOR DIV E_HREF MAYOR;//Texto sin cambios
-
-                                            //Texto//
-conjuntoDeTexto::= conjuntoDeTexto texto|texto;
-texto::= IDENTIFICADOR:i{:textoAEscribir.add(i);:};
-texto::= DOS_PUNTOS:i{:textoAEscribir.add(i);:};
-
-
-                                               //ATRIBUTOS//
-
-atributosBody::=atributosBody unAtributoBody|unAtributoBody;
-unAtributoBody::=BGCOLOR:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributoBody::= TEXT:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributoBody::= LINK:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-
-
-atributosParrafo::= ALIGN:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-
-
-
-atributos::= atributos unAtributo|unAtributo;
-unAtributo::= BGCOLOR:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= TEXT:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= LINK:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= ALIGN:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= SIZE:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= FACE:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= COLOR:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= TYPE:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= START:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= WIDTH:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-unAtributo::= NAME:i IGUAL ORACION_TIPO_ATRIBUTO:e 
-{:atributos.add(new AtributoDeEtiqueta(ileft,iright,i,e));:};
-
+texto2::=E_HTML:i{:RESULT=i;:}|E_HEAD:i{:RESULT=i;:}|E_TITLE:i{:RESULT=i;:}|E_BODY:i{:RESULT=i;:}|E_CENTER:i{:RESULT=i;:}|E_PARRAFO:i{:RESULT=i;:}|
+E_NEGRILLA:i{:RESULT=i;:}|E_SUBRAYADO:i{:RESULT=i;:}|E_ITALICA:i{:RESULT=i;:}|E_STRIKE:i{:RESULT=i;:}|E_BLINK:i{:RESULT=i;:}|
+E_SUB:i{:RESULT=i;:}|E_SUP:i{:RESULT=i;:}|E_FONT:i{:RESULT=i;:}|E_UL:i{:RESULT=i;:}|E_LI:i{:RESULT=i;:}|E_OL:i{:RESULT=i;:}|
+E_BR:i{:RESULT=i;:}|E_NOBR:i{:RESULT=i;:}|E_HR:i{:RESULT=i;:}|E_BLOCKQUOTE:i{:RESULT=i;:}|E_A:i{:RESULT=i;:}|E_HREF:i{:RESULT=i;:};
 */
-
-
 //-----------------------------------------Instrucciones posibles-----------------------------------------
 
-conjuntoDeInstrucciones::= conjuntoDeInstrucciones unaInstruccion | unaInstruccion;
-unaInstruccion::=declaracionDeVariable;
-unaInstruccion::=asignacionDeVariable;
-unaInstruccion::=condicional;
-unaInstruccion::=escritura;
-unaInstruccion::=cicloFor;
-unaInstruccion::=cicloWhile;
+conjuntoDeInstrucciones::= conjuntoDeInstrucciones:i unaInstruccion:e {:RESULT=i+e;:} | unaInstruccion:i{:RESULT=i;:};
+unaInstruccion::=declaracionDeVariable{:RESULT="";:};
+unaInstruccion::=asignacionDeVariable{:RESULT="";:};
+unaInstruccion::=condicional:i{:RESULT=i;:};
+unaInstruccion::=escritura:i{:RESULT=i;:};
+unaInstruccion::=cicloFor:i{:RESULT=i;:};
+unaInstruccion::=cicloWhile:i{:RESULT=i;:}|
+error;
 
- //----------------------------------------------------CicloWhile(For)-------------------------------
+ //----------------------------------------------------CicloWhile(While)-------------------------------
 
 cicloWhile::=WHILE:i expresionesBooleanas:e bloque:f
              {:CicloWhile cicloWhile = new CicloWhile(ileft,iright,e,f);
-               ManejadorDeCicloWhile manW= new ManejadorDeCicloWhile(cicloWhile,manejadorDeVariables);
+               ManejadorDeCicloWhile manW= new ManejadorDeCicloWhile(cicloWhile,manejadorDeVariables,erroresEnAnalisis);
                manW.realizarOperaciones();
+               RESULT=cicloWhile.getTexto();
              :};
 
 cicloWhile::=WHILE:i IDENTIFICADOR:e bloque:f
              {:Identificador id=new Identificador(eleft,eright,e);
                CicloWhile cicloWhile = new CicloWhile(ileft,iright,id,f);
-               ManejadorDeCicloWhile manW= new ManejadorDeCicloWhile(cicloWhile,manejadorDeVariables);
+               ManejadorDeCicloWhile manW= new ManejadorDeCicloWhile(cicloWhile,manejadorDeVariables,erroresEnAnalisis);
                manW.realizarOperaciones();
-              :};
+               RESULT=cicloWhile.getTexto();
+               :};
 
 
  //----------------------------------------------------CicloFor(For)-------------------------------
 
 cicloFor::=FOR:i IDENTIFICADOR:e DOS_PUNTOS IGUAL NUMERO:f TO NUMERO:g bloque:h
             {:CicloFor cicloF = new CicloFor(ileft,iright,f,g,h,e,manejadorDeVariables);
-            ManejadorDeCicloFor man=new ManejadorDeCicloFor(cicloF,manejadorDeVariables);
+            ManejadorDeCicloFor man=new ManejadorDeCicloFor(cicloF,manejadorDeVariables,erroresEnAnalisis);
             man.realizarOperaciones();
+            RESULT=cicloF.getTexto();
             :};
 
  //----------------------------------------------------Condicional(IF)-------------------------------
@@ -421,18 +391,20 @@ condicional::=IF:i IDENTIFICADOR:e THEN bloque:f ELSE bloque:g
               {:
               Identificador id=new Identificador(eleft,eright,e);
               Condicion condicion= new Condicion(ileft,iright,id,f,g);
-              ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(condicion,manejadorDeVariables);
+              ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(condicion,manejadorDeVariables,erroresEnAnalisis);
               manejador.realizarOperaciones();
-              instruccionesParaIf=new ArrayList<>();
-              instruccionesElseParaIf=new ArrayList<>();
+              //instruccionesParaIf=new ArrayList<>();
+              //instruccionesElseParaIf=new ArrayList<>();
+              RESULT=condicion.getTexto();
               :};
 
 
 condicional::=IF:i expresionesBooleanas:e THEN bloque:f ELSE bloque:g
                 {:
                 Condicion condicion= new Condicion(ileft,iright,e,f,g);
-                ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(condicion,manejadorDeVariables);
+                ManejadorDeCondiciones manejador = new ManejadorDeCondiciones(condicion,manejadorDeVariables,erroresEnAnalisis);
                 manejador.realizarOperaciones();
+                RESULT=condicion.getTexto();
                 :};
 
 
@@ -523,9 +495,9 @@ escritura::=PRINT:i PARENTESIS_ABIERTO conjuntoDeTexto:e ultimaInstruccion:f PAR
            {:
             e.add(f);
             Escritura escritura=new Escritura(ileft,iright,e);
-             ManejadorDeEscritura  man =new ManejadorDeEscritura(escritura,manejadorDeVariables);
+             ManejadorDeEscritura  man =new ManejadorDeEscritura(escritura,manejadorDeVariables,erroresEnAnalisis);
              man.manejarEscritura();
-             instruccionesPrint=new ArrayList<>();
+             RESULT=escritura.getTextoGenerado();
             :};
 
 escritura::=PRINT:i PARENTESIS_ABIERTO ultimaInstruccion:e PARENTESIS_CERRADO PUNTO_COMA
@@ -533,7 +505,7 @@ escritura::=PRINT:i PARENTESIS_ABIERTO ultimaInstruccion:e PARENTESIS_CERRADO PU
             ArrayList<Nodo> lista = new ArrayList<>();
             lista.add(e);
             Escritura escritura=new Escritura(ileft,iright,lista);
-            ManejadorDeEscritura  man =new ManejadorDeEscritura(escritura,manejadorDeVariables);
+            ManejadorDeEscritura  man =new ManejadorDeEscritura(escritura,manejadorDeVariables,erroresEnAnalisis);
             man.manejarEscritura();
             :};
 
@@ -557,27 +529,27 @@ ultimaInstruccion::=IDENTIFICADOR:i{:RESULT=new Identificador(ileft, iright,i);:
 
 declaracionDeVariable::=VAR:a IDENTIFICADOR:i DOS_PUNTOS INTEGER PUNTO_COMA
                         {:Variable variable = new Variable(ileft,iright,i,"entera","0");
-                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
+                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable,erroresEnAnalisis);
                         man.crearVariable();:}|
                         VAR IDENTIFICADOR:i DOS_PUNTOS BOOLEAN:e PUNTO_COMA
                         {:Variable variable = new Variable(ileft,iright,i,"booleana","true");
-                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
+                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable,erroresEnAnalisis);
                         man.crearVariable();:}|
                         VAR IDENTIFICADOR:i DOS_PUNTOS STRING:e PUNTO_COMA
                         {:Variable variable = new Variable(ileft,iright,i,"cadena","");
-                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable);
+                        ManejadorDeCreacionDeVariables man = new ManejadorDeCreacionDeVariables(manejadorDeVariables,variable,erroresEnAnalisis);
                         man.crearVariable();:};
 
 //----------------------------------------------------Asignacion de variables-------------------------------
 
 asignacionDeVariable::= IDENTIFICADOR:i DOS_PUNTOS IGUAL expresion:e PUNTO_COMA
                         {:Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
-                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion,true);
+                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion,true,erroresEnAnalisis);
                         nuevaAsignacion.asignacionDeVariable();:}|
                         IDENTIFICADOR:i DOS_PUNTOS IGUAL expresionesBooleanas:e PUNTO_COMA
                         {:System.out.println("Asignacion a booleana");
                         Asignacion asignacion = new Asignacion(i, e, manejadorDeVariables);
-                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion,true);
+                        ManejadorDeAsignacionDeExpresiones nuevaAsignacion = new ManejadorDeAsignacionDeExpresiones(manejadorDeVariables, asignacion,true,erroresEnAnalisis);
                         nuevaAsignacion.asignacionDeVariable();:};    
                         
 

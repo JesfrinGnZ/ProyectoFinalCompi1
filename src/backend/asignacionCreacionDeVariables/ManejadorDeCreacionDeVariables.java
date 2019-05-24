@@ -5,9 +5,12 @@
  */
 package backend.asignacionCreacionDeVariables;
 
+import backend.errores.ErrorAnalisis;
+import backend.errores.ErrorSemantico;
 import backend.expresiones.*;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
+import java.util.ArrayList;
 
 /**
  *
@@ -17,10 +20,13 @@ public class ManejadorDeCreacionDeVariables {
 
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;
     private Variable variable;
+    private ArrayList<ErrorAnalisis> listaDeErrores;
 
-    public ManejadorDeCreacionDeVariables(ManejadorDeTablaDeSimbolos manejadorDeVariables,Variable variable) {
+    public ManejadorDeCreacionDeVariables(ManejadorDeTablaDeSimbolos manejadorDeVariables,Variable variable,ArrayList<ErrorAnalisis> listaDeErrores) {
         this.manejadorDeVariables = manejadorDeVariables;
         this.variable=variable;
+        this.listaDeErrores=listaDeErrores;
+        
     }
 
     public void crearVariable() {
@@ -28,7 +34,9 @@ public class ManejadorDeCreacionDeVariables {
         if (var == null) {
             this.manejadorDeVariables.anadirVariable(this.variable);
         } else {
-            System.out.println("Error ya existia la variable ajja");
+            ErrorSemantico nuevoError = new ErrorSemantico(this.variable.getNumeroDeLinea(),variable.getNumeroDeColumna(),"Ya se declaro la variable:"+variable.getNombreDeVariable());
+            this.listaDeErrores.add(nuevoError);
+            //System.out.println("Error ya existia la variable ajja");
         }
     }
 

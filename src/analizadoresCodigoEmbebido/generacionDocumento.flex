@@ -2,7 +2,9 @@
 
 package backend.generacionHtml;
 import java_cup.runtime.*;
+import backend.errores.*;
 import static backend.generacionHtml.sym.*;
+import java.util.ArrayList;
 
 
 %% //------------------>2da area<--------------------------    
@@ -23,7 +25,10 @@ Identificador = ([:jletterdigit:] | [_] )+
 Digitos= 0|[1-9][:digit:]*
 
 %{
-
+  
+  private String cadena="";
+  private ArrayList<ErrorAnalisis> erroresEnAnalisis;
+  
   private Symbol symbol(int type) {
     return new Symbol(type, yyline+1, yycolumn+1);
   }
@@ -31,7 +36,10 @@ Digitos= 0|[1-9][:digit:]*
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline+1, yycolumn+1, value);
   }
-  
+
+  public void iniciarListaDeErrores(ArrayList<ErrorAnalisis> erroresEnAnalisis){
+        this.erroresEnAnalisis=erroresEnAnalisis;
+    }
 
 %}
 
@@ -200,5 +208,6 @@ Digitos= 0|[1-9][:digit:]*
 
 //<<EOF>>                 { return symbol(EOF);
 
-[^]     {/*Error lexico*/}
+[^]     { ErrorLexico nuevoError = new ErrorLexico(yyline,yycolumn,"Token no valido:"+yytext());
+          erroresEnAnalisis.add(nuevoError);}
 

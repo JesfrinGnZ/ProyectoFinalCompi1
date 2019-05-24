@@ -6,9 +6,12 @@
 package backend.Escritura;
 
 import backend.arbolAST.Nodo;
+import backend.errores.ErrorAnalisis;
+import backend.errores.ErrorSemantico;
 import backend.expresiones.Identificador;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
+import java.util.ArrayList;
 
 /**
  *
@@ -20,12 +23,14 @@ public class ManejadorDeEscritura {
     private String textoAEscribir;
     private ManejadorDeTablaDeSimbolos manejadorDeVariables;
     private boolean existioErrorAlRealizarLaOperacion;
+    private ArrayList<ErrorAnalisis> listaDeErrores;
 
-    public ManejadorDeEscritura(Escritura escritura, ManejadorDeTablaDeSimbolos man) {
+    public ManejadorDeEscritura(Escritura escritura, ManejadorDeTablaDeSimbolos man,ArrayList<ErrorAnalisis> listaDeErrores) {
         this.escritura = escritura;
         this.textoAEscribir = "";
         this.manejadorDeVariables = man;
         this.existioErrorAlRealizarLaOperacion = false;
+        this.listaDeErrores=listaDeErrores;
     }
 
     public void manejarEscritura() {
@@ -39,7 +44,9 @@ public class ManejadorDeEscritura {
                 Variable var = this.manejadorDeVariables.verificarSiExisteVariable(op.getId());
                 if (var == null) {//Si variable existe y es de tipo entera
                     //Error semantico, la variable no ha sido declarada
-                    System.out.println("Error semantico la variable" + op.getId() + " no ha sido declarada");
+                    //System.out.println("Error semantico la variable" + op.getId() + " no ha sido declarada");
+                    ErrorSemantico nuevoError = new ErrorSemantico(op.getNumeroDeLinea(),op.getNumeroDeColumna(), "La variable no ha sido declarada:"+op.getId());
+                    this.listaDeErrores.add(nuevoError);
                     this.existioErrorAlRealizarLaOperacion = true;
                 } else {
                     this.textoAEscribir += var.getValorDeVariable();
@@ -47,7 +54,10 @@ public class ManejadorDeEscritura {
             }
         }
        if(!this.existioErrorAlRealizarLaOperacion){
-            System.out.println("INSTRUCCION DE PRINT:"+this.textoAEscribir);
+           this.escritura.setTextoGenerado(this.textoAEscribir);
+           System.out.println("INSTRUCCION DE PRINT:"+this.textoAEscribir);
+       }else{
+           this.escritura.setTextoGenerado("");
        }
     }
 

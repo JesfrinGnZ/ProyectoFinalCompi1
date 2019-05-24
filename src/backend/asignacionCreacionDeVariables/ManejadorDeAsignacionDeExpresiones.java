@@ -5,12 +5,16 @@
  */
 package backend.asignacionCreacionDeVariables;
 
+import backend.errores.ErrorAnalisis;
+import backend.errores.ErrorSemantico;
+import backend.errores.ErrorSintactico;
 import backend.expesionesBooleanas.ManejadorDeExpresionesBooleanas;
 import backend.expresiones.*;
 import backend.expresionesAritmeticas.ManejadorDeExpresionesAritmeticas;
 import backend.expresionesConCadenas.ManejadorDeExpresionesTipoCadena;
 import backend.tablaDeSimbolos.ManejadorDeTablaDeSimbolos;
 import backend.tablaDeSimbolos.Variable;
+import java.util.ArrayList;
 
 /**
  *
@@ -22,18 +26,22 @@ public class ManejadorDeAsignacionDeExpresiones {
     private Asignacion asignacion;
     private boolean seDebeRealizarLaAsignacion;
     private boolean errorEnAsignacion;
+    private ArrayList<ErrorAnalisis> listaDeErrores;
 
-    public ManejadorDeAsignacionDeExpresiones(ManejadorDeTablaDeSimbolos man, Asignacion asignacion, boolean seDebeRealizarLaAsignacion) {
+    public ManejadorDeAsignacionDeExpresiones(ManejadorDeTablaDeSimbolos man, Asignacion asignacion, boolean seDebeRealizarLaAsignacion, ArrayList<ErrorAnalisis> listaDeErrores) {
         this.manejadorDeVariables = man;
         this.asignacion = asignacion;
         this.seDebeRealizarLaAsignacion = seDebeRealizarLaAsignacion;
         this.errorEnAsignacion = false;
+        this.listaDeErrores = listaDeErrores;
     }
 
     public void asignacionDeVariable() {
         Variable var = this.asignacion.getVariable();
         if (var == null) {
-            System.out.println("Error sintatico no exite la variable declarada");
+            ErrorSemantico nuevoError = new ErrorSemantico(this.asignacion.getNumeroDeLinea(), this.asignacion.getNumeroDeColumna(), "No existe la variable declarada:" + this.asignacion.getIdDeVariable());
+            this.listaDeErrores.add(nuevoError);
+            //System.out.println("Error sintatico no exite la variable declarada");
         } else {
             switch (var.getTipoDeVariable()) {
                 case "entera":
@@ -45,7 +53,9 @@ public class ManejadorDeAsignacionDeExpresiones {
                         }
                         System.out.println("Id:" + this.asignacion.getVariable().getNombreDeVariable() + " Valor:" + this.asignacion.getVariable().getValorDeVariable());
                     } else {
-                        System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
+                        ErrorSintactico nuevoE = new ErrorSintactico(this.asignacion.getNumeroDeLinea(), this.asignacion.getNumeroDeColumna(), "Asignacion no valida");
+                        this.listaDeErrores.add(nuevoE);
+                        //System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
                         this.errorEnAsignacion = true;
                     }
                     break;
@@ -58,8 +68,10 @@ public class ManejadorDeAsignacionDeExpresiones {
                         }
                         System.out.println("Id:" + this.asignacion.getVariable().getNombreDeVariable() + " Valor:" + this.asignacion.getVariable().getValorDeVariable());
                     } else {
+                        ErrorSintactico nuevoE = new ErrorSintactico(this.asignacion.getNumeroDeLinea(), this.asignacion.getNumeroDeColumna(), "Asignacion no valida");
+                        this.listaDeErrores.add(nuevoE);
                         this.errorEnAsignacion = true;
-                        System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
+                        //System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
                     }
                     break;
                 case "booleana":
@@ -77,7 +89,9 @@ public class ManejadorDeAsignacionDeExpresiones {
                         }
                     } else {
                         this.errorEnAsignacion = true;
-                        System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
+                        ErrorSintactico nuevoE = new ErrorSintactico(this.asignacion.getNumeroDeLinea(), this.asignacion.getNumeroDeColumna(), "Asignacion no valida");
+                        this.listaDeErrores.add(nuevoE);
+                        //System.out.println("No se ha asignado la variable:" + this.asignacion.getVariable().getNombreDeVariable());
                     }
                     break;
                 default:

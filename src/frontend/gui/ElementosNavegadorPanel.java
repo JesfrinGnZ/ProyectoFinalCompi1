@@ -5,6 +5,7 @@
  */
 package frontend.gui;
 
+import backend.errores.ErrorAnalisis;
 import backend.generacionHtml.AnalizadorDeCodigoEmbebido;
 import backend.generacionHtml.parser;
 import backend.tablaDeSimbolos.Variable;
@@ -25,9 +26,11 @@ import javax.swing.text.BadLocationException;
  */
 public class ElementosNavegadorPanel extends javax.swing.JPanel {
 
+    private ArrayList<ErrorAnalisis> erroresEnAnalisis;
     private boolean seGuardo;
     private ArrayList<Variable> tablaDeVariables;
     private File ruta;
+    
     /**
      * Creates new form ElementosNavegadorPanel
      * @param ruta
@@ -36,6 +39,7 @@ public class ElementosNavegadorPanel extends javax.swing.JPanel {
         initComponents();
        this.seGuardo = false;
        this.ruta=ruta;
+       this.erroresEnAnalisis=new ArrayList<>();
 //        this.tablaDeVariables = new ArrayList<>();
 //        this.instruccionesTextArea.setAlignmentX(0.5f);
 //        this.instruccionesTextArea.append("HOLA MUNDO");
@@ -219,11 +223,18 @@ public class ElementosNavegadorPanel extends javax.swing.JPanel {
     public void analizarTexto(String texto) {
         AnalizadorDeCodigoEmbebido lex = new AnalizadorDeCodigoEmbebido(new BufferedReader(new StringReader(texto)));
         tablaDeVariables=new ArrayList<>();
-        parser sintactico = new parser(lex, tablaDeVariables,new ManejadorDeTextArea(this.resultadosTextPane));//Recibe el manejador del 
+        this.erroresEnAnalisis=new ArrayList<>();
+        lex.iniciarListaDeErrores(erroresEnAnalisis);
+        parser sintactico = new parser(lex, tablaDeVariables,new ManejadorDeTextArea(this.resultadosTextPane),this.erroresEnAnalisis);//Recibe el manejador del 
         try {
             sintactico.parse();
         } catch (Exception ex) {
             Logger.getLogger(ElementosNavegadorPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if(this.erroresEnAnalisis.isEmpty()){
+            System.out.println("ES VACIA NO GUARDO NADA");
+        }else{
+            System.out.println("GUARDO ERRORES SI!!!!!");
         }
     }
 
